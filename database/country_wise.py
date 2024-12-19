@@ -1,131 +1,135 @@
-
-from config_db import connect_to_db, host, dbname, user, password, port
+from config_db import connect_to_db
 import pandas as pd
-from sqlalchemy import create_engine
 import numpy as np
 
 # Connexion à la base de données
-conn = connect_to_db()
+def connect_to_database():
+    return connect_to_db()
 
 # Charger les données depuis un fichier CSV
-file_path = "C:/Users/Anes/Downloads/country_wise_latest.csv"  # Chemin vers votre fichier CSV
-try:
-    data = pd.read_csv(file_path)
-    print("Fichier chargé avec succès.")
-except Exception as e:
-    print(f"Erreur lors du chargement du fichier : {e}")
-    conn.close()
-    exit()
-
-# Vérification du contenu des données
-print("Affichage des premières lignes du fichier CSV chargé:")
-print(data.head())
+def load_data_from_csv(file_path):
+    try:
+        data = pd.read_csv(file_path)
+        print("Fichier chargé avec succès.")
+        return data
+    except Exception as e:
+        print(f"Erreur lors du chargement du fichier : {e}")
+        return None
 
 # Nettoyer les données : remplacer les valeurs infinies et NaN par None (NULL) ou 0
-data.replace([np.inf, -np.inf], None, inplace=True)  # Remplacer les infinis par None
-data.fillna(0, inplace=True)  # Remplacer les NaN par 0
+def clean_data(data):
+    data.replace([np.inf, -np.inf], None, inplace=True)  # Remplacer les infinis par None
+    data.fillna(0, inplace=True)  # Remplacer les NaN par 0
+    return data
 
-# Renommer les colonnes pour qu'elles correspondent à la table SQL
-data.columns = [
-    "CountryRegion", "Confirmed", "Deaths", "Recovered", "Active",
-    "NewCases", "NewDeaths", "NewRecovered", "DeathsPer100Cases",
-    "RecoveredPer100Cases", "DeathsPer100Recovered", "ConfirmedLastWeek",
-    "OneWeekChange", "OneWeekPercentageIncrease", "WHORegion"
-]
+# Renommer les colonnes pour correspondre à la structure de la table SQL
+def rename_columns(data):
+    data.columns = [
+        "CountryRegion", "Confirmed", "Deaths", "Recovered", "Active",
+        "NewCases", "NewDeaths", "NewRecovered", "DeathsPer100Cases",
+        "RecoveredPer100Cases", "DeathsPer100Recovered", "ConfirmedLastWeek",
+        "OneWeekChange", "OneWeekPercentageIncrease", "WHORegion"
+    ]
+    return data
 
-# Convertir chaque ligne du DataFrame en un tuple
-tuples_data = [tuple(row) for row in data.values]
-
-# Création d'un moteur SQLAlchemy pour faciliter l'insertion dans la base de données
-engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}")
-
-# Vérification de l'existence de la table et modification si nécessaire
-try:
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            SELECT to_regclass('public.CovidStatistics');
-        """)
-        result = cursor.fetchone()
-        if result[0] is None:
-            # La table n'existe pas, on la crée avec la clé primaire
+# Créer la table 'CovidStatistics' si elle n'existe pas
+def create_covid_statistics_table(conn):
+    try:
+        with conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE CovidStatistics (
-                    "CountryRegion" VARCHAR(100) PRIMARY KEY,
-                    "Confirmed" INT,
-                    "Deaths" INT,
-                    "Recovered" INT,
-                    "Active" INT,
-                    "NewCases" INT,
-                    "NewDeaths" INT,
-                    "NewRecovered" INT,
-                    "DeathsPer100Cases" DECIMAL(10,2),
-                    "RecoveredPer100Cases" DECIMAL(10,2),
-                    "DeathsPer100Recovered" DECIMAL(10,2),
-                    "ConfirmedLastWeek" INT,
-                    "OneWeekChange" INT,
-                    "OneWeekPercentageIncrease" DECIMAL(10,2),
-                    "WHORegion" VARCHAR(100)
-                );
+                SELECT to_regclass('public.CovidStatistics');
             """)
-            conn.commit()
-            print("Table créée avec succès avec la clé primaire.")
-        else:
-            # La table existe déjà, on vérifie si la clé primaire existe
-            cursor.execute("""
-                SELECT conname
-                FROM pg_constraint
-                WHERE conrelid = 'public.CovidStatistics'::regclass
-                  AND contype = 'p';
-            """)
-            primary_key = cursor.fetchone()
-            if not primary_key:
-                # Ajouter la clé primaire si elle n'existe pas
+            result = cursor.fetchone()
+            if result[0] is None:
                 cursor.execute("""
-                    ALTER TABLE CovidStatistics
-                    ADD PRIMARY KEY ("CountryRegion");
+                    CREATE TABLE CovidStatistics (
+                        "CountryRegion" VARCHAR(100) PRIMARY KEY,
+                        "Confirmed" INT,
+                        "Deaths" INT,
+                        "Recovered" INT,
+                        "Active" INT,
+                        "NewCases" INT,
+                        "NewDeaths" INT,
+                        "NewRecovered" INT,
+                        "DeathsPer100Cases" DECIMAL(10,2),
+                        "RecoveredPer100Cases" DECIMAL(10,2),
+                        "DeathsPer100Recovered" DECIMAL(10,2),
+                        "ConfirmedLastWeek" INT,
+                        "OneWeekChange" INT,
+                        "OneWeekPercentageIncrease" DECIMAL(10,2),
+                        "WHORegion" VARCHAR(100)
+                    );
                 """)
                 conn.commit()
-                print("Clé primaire ajoutée à la table existante.")
+                print("Table créée avec succès avec la clé primaire.")
             else:
-                print("La clé primaire existe déjà sur la table.")
-except Exception as e:
-    print(f"Erreur lors de la vérification ou modification de la table : {e}")
-    conn.close()
-    exit()
+                print("La table existe déjà.")
+    except Exception as e:
+        print(f"Erreur lors de la création ou modification de la table : {e}")
+        conn.close()
+        exit()
 
-# Insérer les données sous forme de tuples dans la base de données avec psycopg2
-try:
-    with conn.cursor() as cursor:
-        insert_query = """
-            INSERT INTO CovidStatistics (
-                "CountryRegion", "Confirmed", "Deaths", "Recovered", "Active",
-                "NewCases", "NewDeaths", "NewRecovered", "DeathsPer100Cases",
-                "RecoveredPer100Cases", "DeathsPer100Recovered", "ConfirmedLastWeek",
-                "OneWeekChange", "OneWeekPercentageIncrease", "WHORegion"
-            ) 
-            SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            WHERE NOT EXISTS (
-                SELECT 1 FROM CovidStatistics WHERE "CountryRegion" = %s
-            );
-        """
-        
-        # Exécution de la requête d'insertion pour chaque ligne
-        for row in tuples_data:
-            cursor.execute(insert_query, (*row, row[0]))
-        conn.commit()
-        print("Données insérées avec succès sans doublons.")
-except Exception as e:
-    print(f"Erreur lors de l'insertion des données : {e}")
+# Insérer les données dans la table 'CovidStatistics'
+def insert_data_into_covid_statistics(conn, data):
+    try:
+        with conn.cursor() as cursor:
+            insert_query = """
+                INSERT INTO CovidStatistics (
+                    "CountryRegion", "Confirmed", "Deaths", "Recovered", "Active",
+                    "NewCases", "NewDeaths", "NewRecovered", "DeathsPer100Cases",
+                    "RecoveredPer100Cases", "DeathsPer100Recovered", "ConfirmedLastWeek",
+                    "OneWeekChange", "OneWeekPercentageIncrease", "WHORegion"
+                ) 
+                SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM CovidStatistics WHERE "CountryRegion" = %s
+                );
+            """
+            # Exécution de la requête d'insertion pour chaque ligne
+            for row in data.values:
+                cursor.execute(insert_query, (*row, row[0]))  # row[0] est "CountryRegion"
+            conn.commit()
+            print("Données insérées avec succès sans doublons.")
+    except Exception as e:
+        print(f"Erreur lors de l'insertion des données : {e}")
 
 # Vérifier si les données ont été insérées correctement
-try:
-    print("Vérification des données dans la table:")
-    query = "SELECT COUNT(*) FROM CovidStatistics;"
-    result = pd.read_sql(query, con=engine)
-    print(f"Nombre de lignes insérées : {result.iloc[0, 0]}")
-except Exception as e:
-    print(f"Erreur lors de la vérification des données : {e}")
+def verify_insertions(conn):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM CovidStatistics;")
+            result = cursor.fetchone()
+            print(f"Nombre de lignes insérées : {result[0]}")
+    except Exception as e:
+        print(f"Erreur lors de la vérification des données : {e}")
 
-# Fermeture de la connexion à la base de données
-conn.close()
-print("Connexion à la base de données fermée.")
+# Programme principal
+def main():
+    # Connexion à la base de données
+    conn = connect_to_database()
+
+    # Charger et nettoyer les données
+    file_path = "C:/Users/Anes/Downloads/country_wise_latest.csv" 
+    data = load_data_from_csv(file_path)
+    if data is None:
+        conn.close()
+        return
+
+    data = clean_data(data)
+    data = rename_columns(data)
+
+    # Créer la table si elle n'existe pas
+    create_covid_statistics_table(conn)
+
+    # Insérer les données dans la base
+    insert_data_into_covid_statistics(conn, data)
+
+    # Vérifier les données insérées
+    verify_insertions(conn)
+
+    # Fermeture de la connexion à la base de données
+    conn.close()
+    print("Connexion à la base de données fermée.")
+
+if __name__ == "__main__":
+    main()
