@@ -4,7 +4,7 @@ from config_db import connect_to_db
 def connect_to_database():
     return connect_to_db()
 
-# Fonction pour créer la table Pays selon la structure du fichier 7
+# Fonction pour créer la table Pays
 def create_country_table(conn):
     try:
         with conn.cursor() as cursor:
@@ -28,7 +28,7 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table Pays selon la structure du fichier 7
+    # Créer la table Pays
     create_country_table(conn)
 
     # Fermer la connexion
