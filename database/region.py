@@ -1,5 +1,6 @@
 from config_db import connect_to_db
 
+
 # Fonction pour établir une connexion à la base de données
 def connect_to_database():
     return connect_to_db()
@@ -11,7 +12,7 @@ def create_region_table(conn):
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Region (
                     "RegionID" SERIAL PRIMARY KEY,
-                    "Region" VARCHAR(100) NOT NULL
+                    "WHORegion" VARCHAR(100) NOT NULL UNIQUE
                 );
             """)
             conn.commit()
@@ -26,6 +27,7 @@ def main():
 
     # Créer la table Region
     create_region_table(conn)
+
 
     # Fermer la connexion
     conn.close()

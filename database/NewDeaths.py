@@ -4,30 +4,25 @@ from config_db import connect_to_db
 def connect_to_database():
     return connect_to_db()
 
-# Fonction pour créer la table covid_stats
-def create_covidstats_table(conn):
+# Fonction pour créer la table NewDeaths
+def create_newdeaths_table(conn):
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS covid_stats (
-                    "id" SERIAL PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS NewDeaths (
+                    "DeathsID" SERIAL PRIMARY KEY,
                     "Country" VARCHAR(255) NOT NULL,
                     "WHORegion" VARCHAR(100),
-                    "Confirmed" INT,
-                    "TotalDeaths" INT,
-                    "TotalRecovered" INT,
-                    "TotalCases" INT,      
-                    "ActiveCases" INT,
-                    "SeriousCritical" INT,
-                    "TotalTests" INT,
+                    "date" DATE NOT NULL,
+                    "daily_new_deaths" INT NOT NULL,
                     FOREIGN KEY ("Country") REFERENCES Pays("Country") ON DELETE SET NULL,
                     FOREIGN KEY ("WHORegion") REFERENCES Region("WHORegion") ON DELETE SET NULL
                 );
             """)
             conn.commit()
-            print("Table covid_stats vérifiée/créée avec succès.")
+            print("Table NewDeaths vérifiée/créée avec succès.")
     except Exception as e:
-        print(f"Erreur lors de la création ou vérification de la table covid_stats : {e}")
+        print(f"Erreur lors de la création ou vérification de la table NewDeaths : {e}")
 
 
 # Fonction principale pour exécuter le processus complet
@@ -35,8 +30,8 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table covid_stats
-    create_covidstats_table(conn)
+    # Créer la table NewDeaths
+    create_newdeaths_table(conn)
 
     # Fermer la connexion
     conn.close()

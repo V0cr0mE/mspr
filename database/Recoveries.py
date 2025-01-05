@@ -4,25 +4,25 @@ from config_db import connect_to_db
 def connect_to_database():
     return connect_to_db()
 
-# Fonction pour créer la table Deces
-def create_deces_table(conn):
+# Fonction pour créer la table Recovered
+def create_Recovered_table(conn):
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS Deces (
-                    "DecesID" SERIAL PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS Recovered (
+                    "NewRecoveredID" SERIAL PRIMARY KEY,
                     "CountryID" INT NOT NULL,
                     "RegionID" INT,
                     "Date" DATE NOT NULL,
-                    "NombreDeces" INT NOT NULL,
+                    "NewRecovered" INT NOT NULL,
                     FOREIGN KEY ("CountryID") REFERENCES Pays("id") ON DELETE SET NULL,
                     FOREIGN KEY ("RegionID") REFERENCES Region("RegionID") ON DELETE SET NULL
                 );
             """)
             conn.commit()
-            print("Table Deces vérifiée/créée avec succès.")
+            print("Table Recovered vérifiée/créée avec succès.")
     except Exception as e:
-        print(f"Erreur lors de la création ou vérification de la table Deces : {e}")
+        print(f"Erreur lors de la création ou vérification de la table Recovered : {e}")
 
 
 # Fonction principale pour exécuter le processus complet
@@ -30,8 +30,8 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table Deces
-    create_deces_table(conn)
+    # Créer la table Recovered
+    create_Recovered_table(conn)
 
     # Fermer la connexion
     conn.close()

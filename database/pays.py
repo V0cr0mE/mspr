@@ -11,17 +11,19 @@ def create_country_table(conn):
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Pays (
                     "id" SERIAL PRIMARY KEY,
-                    "Country" VARCHAR(255) NOT NULL,
+                    "Country" VARCHAR(255) NOT NULL UNIQUE,
                     "Continent" VARCHAR(255),
                     "Population" INT,   
-                    "RegionID" INT,
-                    FOREIGN KEY ("RegionID") REFERENCES Region("RegionID") ON DELETE SET NULL            
+                    "WHORegion" VARCHAR(100),
+                    FOREIGN KEY ("WHORegion") REFERENCES Region("WHORegion") ON DELETE SET NULL          
                 );
             """)
             conn.commit()
             print("Table Pays vérifiée/créée avec succès.")
     except Exception as e:
         print(f"Erreur lors de la création ou vérification de la table Pays : {e}")
+
+
 
 # Fonction principale pour exécuter le processus complet
 def main():

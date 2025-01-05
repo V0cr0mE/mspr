@@ -10,13 +10,13 @@ def create_NewCases_table(conn):
         with conn.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS NewCases (
-                    "NewCasesID" SERIAL PRIMARY KEY,
-                    "CountryID" INT NOT NULL,
-                    "RegionID" INT,
+                    "DeathsID" SERIAL PRIMARY KEY,
+                    "Country" VARCHAR(255) NOT NULL,
+                    "WHORegion" VARCHAR(100),
                     "Date" DATE NOT NULL,
-                    "NewCases" INT NOT NULL,
-                    FOREIGN KEY ("CountryID") REFERENCES Pays("id") ON DELETE SET NULL,
-                    FOREIGN KEY ("RegionID") REFERENCES Region("RegionID") ON DELETE SET NULL
+                    "daily_new_cases" INT NOT NULL,
+                    FOREIGN KEY ("Country") REFERENCES Pays("Country") ON DELETE SET NULL,
+                    FOREIGN KEY ("WHORegion") REFERENCES Region("WHORegion") ON DELETE SET NULL
                 );
             """)
             conn.commit()
