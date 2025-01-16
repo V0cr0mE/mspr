@@ -4,25 +4,26 @@ from config_db import connect_to_db
 def connect_to_database():
     return connect_to_db()
 
-# Fonction pour créer la table NewDeaths
+# Fonction pour créer la table newdeaths
 def create_newdeaths_table(conn):
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS NewDeaths (
-                    "DeathsID" SERIAL PRIMARY KEY,
-                    "Country" VARCHAR(255) NOT NULL,
-                    "WHORegion" VARCHAR(100),
-                    "date" DATE NOT NULL,
-                    "daily_new_deaths" INT NOT NULL,
-                    FOREIGN KEY ("Country") REFERENCES Pays("Country") ON DELETE SET NULL,
-                    FOREIGN KEY ("WHORegion") REFERENCES Region("WHORegion") ON DELETE SET NULL
+                CREATE TABLE IF NOT EXISTS newdeaths (
+                    "id_newdeath" SERIAL PRIMARY KEY,
+                    "id_country" INT,
+                    "id_pandemic" INT,  
+                    "date" DATE,
+                    "daily_new_deaths" BIGINT,
+                    FOREIGN KEY ("id_country") REFERENCES country("id_country"),
+                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
+                    
                 );
             """)
             conn.commit()
-            print("Table NewDeaths vérifiée/créée avec succès.")
+            print("Table newdeaths vérifiée/créée avec succès.")
     except Exception as e:
-        print(f"Erreur lors de la création ou vérification de la table NewDeaths : {e}")
+        print(f"Erreur lors de la création ou vérification de la table newdeaths : {e}")
 
 
 # Fonction principale pour exécuter le processus complet

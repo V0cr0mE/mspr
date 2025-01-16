@@ -55,7 +55,7 @@ def load(data, output_file):
 
 
 # Processus principal
-def run_etl():
+if __name__ == "__main__":
     # Chemin du fichier source
     file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
     output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_clean.csv"
