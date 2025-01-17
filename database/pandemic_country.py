@@ -4,15 +4,14 @@ from config_db import connect_to_db
 def connect_to_database():
     return connect_to_db()
 
-# Fonction pour créer la table pandemic_stats
-def create_pandemic_stats_table(conn):
+# Fonction pour créer la table pandemic_country
+def create_pandemic_country_table(conn):
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS pandemic_stats (
+                CREATE TABLE IF NOT EXISTS pandemic_country (
                     "id_statistic" SERIAL PRIMARY KEY,
                     "id_country" INT,
-                    "Id_continent" INT,
                     "id_pandemic" INT,
                     "total_confirmed" BIGINT,
                     "total_deaths" BIGINT,
@@ -24,14 +23,13 @@ def create_pandemic_stats_table(conn):
                     "total_deaths_per_1m_population" BIGINT,
                     "total_cases_per_1m_population" BIGINT,    
                     FOREIGN KEY ("id_country") REFERENCES country("id_country"),
-                    FOREIGN KEY ("Id_continent") REFERENCES Continent("Id_continent"),
                     FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
                 );
             """)
             conn.commit()
-            print("Table pandemic_stats vérifiée/créée avec succès.")
+            print("Table pandemic_country vérifiée/créée avec succès.")
     except Exception as e:
-        print(f"Erreur lors de la création ou vérification de la table pandemic_stats : {e}")
+        print(f"Erreur lors de la création ou vérification de la table pandemic_country : {e}")
 
 
 # Fonction principale pour exécuter le processus complet
@@ -39,8 +37,8 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table pandemic_stats
-    create_pandemic_stats_table(conn)
+    # Créer la table pandemic_country
+    create_pandemic_country_table(conn)
 
     # Fermer la connexion
     conn.close()
