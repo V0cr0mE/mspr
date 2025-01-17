@@ -11,18 +11,17 @@ def create_country_table(conn):
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS country (
                     "id_country" SERIAL PRIMARY KEY,
-                    "id_pandemic" INT,
                     "country" VARCHAR(255) NOT NULL UNIQUE,
                     "population" BIGINT,   
                     "Id_continent" INT,
-                    FOREIGN KEY ("Id_continent") REFERENCES Continent("Id_continent"),
-                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")        
+                    FOREIGN KEY ("Id_continent") REFERENCES Continent("Id_continent")
+                           
                 );
             """)
             conn.commit()
-            print("Table Pays vérifiée/créée avec succès.")
+            print("Table country vérifiée/créée avec succès.")
     except Exception as e:
-        print(f"Erreur lors de la création ou vérification de la table Pays : {e}")
+        print(f"Erreur lors de la création ou vérification de la table country : {e}")
 
 
 
@@ -31,7 +30,7 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table Pays
+    # Créer la table country
     create_country_table(conn)
 
     # Fermer la connexion

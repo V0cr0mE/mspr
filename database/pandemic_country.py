@@ -23,7 +23,8 @@ def create_pandemic_country_table(conn):
                     "total_deaths_per_1m_population" BIGINT,
                     "total_cases_per_1m_population" BIGINT,    
                     FOREIGN KEY ("id_country") REFERENCES country("id_country"),
-                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
+                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic"),
+                    CONSTRAINT unique_country_pandemic UNIQUE ("id_country", "id_pandemic")
                 );
             """)
             conn.commit()

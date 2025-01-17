@@ -12,7 +12,7 @@ def create_Continent_table(conn):
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Continent (
                     "Id_continent" SERIAL PRIMARY KEY,
-                    "continent" VARCHAR(100) NOT NULL
+                    "continent" VARCHAR(100) NOT NULL UNIQUE
                 );
             """)
             conn.commit()
@@ -25,7 +25,7 @@ def main():
     # Connexion à la base de données
     conn = connect_to_database()
 
-    # Créer la table Region
+    # Créer la table continent
     create_Continent_table(conn)
 
 

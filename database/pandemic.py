@@ -11,7 +11,7 @@ def create_pandemic_table(conn):
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pandemic (
                     "id_pandemic" SERIAL PRIMARY KEY,
-                    "name" VARCHAR(255) NOT NULL                    
+                    "name" VARCHAR(255) NOT NULL UNIQUE                   
                 );
             """)
             conn.commit()
