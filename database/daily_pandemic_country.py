@@ -10,16 +10,15 @@ def create_daily_pandemic_country_table(conn):
         with conn.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS daily_pandemic_country (
-                    "id_daily_pandemic_country" SERIAL PRIMARY KEY UNIQUE,
                     "id_country" INT,
                     "id_pandemic" INT,  
                     "date" DATE,
                     "daily_new_deaths" BIGINT,
                     "daily_new_cases" BIGINT,
+                    PRIMARY KEY ("id_country","id_pandemic","date"), 
                     FOREIGN KEY ("id_country") REFERENCES country("id_country"),
-                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic"),
-                    CONSTRAINT unique_country_pandemic_date UNIQUE ("id_country", "id_pandemic", "date")
-                    
+                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
+                          
                 );
             """)
             conn.commit()

@@ -10,7 +10,6 @@ def create_pandemic_country_table(conn):
         with conn.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pandemic_country (
-                    "id_statistic" SERIAL PRIMARY KEY,
                     "id_country" INT,
                     "id_pandemic" INT,
                     "total_confirmed" BIGINT,
@@ -21,10 +20,11 @@ def create_pandemic_country_table(conn):
                     "total_tests" BIGINT,
                     "total_tests_per_1m_population" BIGINT,
                     "total_deaths_per_1m_population" BIGINT,
-                    "total_cases_per_1m_population" BIGINT,    
+                    "total_cases_per_1m_population" BIGINT,
+                    PRIMARY KEY ("id_country","id_pandemic"), 
                     FOREIGN KEY ("id_country") REFERENCES country("id_country"),
-                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic"),
-                    CONSTRAINT unique_country_pandemic UNIQUE ("id_country", "id_pandemic")
+                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
+                    
                 );
             """)
             conn.commit()
