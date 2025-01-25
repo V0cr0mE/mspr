@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath("MSPR"))))
-from database.config_db import connect_to_db
+from models.config_db import connect_to_db
 
 # Fonction pour établir une connexion à la base de données
 def connect_to_database():
