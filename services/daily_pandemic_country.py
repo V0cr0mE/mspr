@@ -38,6 +38,7 @@ def add_daily_data(id_country, id_pandemic, date, daily_new_deaths, daily_new_ca
         cursor.execute("""
             INSERT INTO daily_pandemic_country ("id_country", "id_pandemic", "date", "daily_new_deaths", "daily_new_cases")
             VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT DO NOTHING;
         """, (id_country, id_pandemic, date, daily_new_deaths, daily_new_cases))
     conn.commit()
     conn.close()
