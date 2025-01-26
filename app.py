@@ -6,6 +6,7 @@ from routes.continent import bp as continent_bp
 from routes.country import bp as country_bp
 from routes.pandemic import bp as pandemic_bp
 from routes.pandemic_country import bp as pandemic_country_bp
+from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
 
 # Ajouter les dossiers 'load' et 'etl' au chemin d'importation
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
@@ -37,6 +38,7 @@ def create_app():
     app.register_blueprint(country_bp)
     app.register_blueprint(pandemic_bp)
     app.register_blueprint(pandemic_country_bp)
+    app.register_blueprint(daily_pandemic_country_bp)
 
     return app
 
