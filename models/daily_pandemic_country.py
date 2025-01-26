@@ -16,8 +16,8 @@ def create_daily_pandemic_country_table(conn):
                     "daily_new_deaths" BIGINT,
                     "daily_new_cases" BIGINT,
                     PRIMARY KEY ("id_country","id_pandemic","date"), 
-                    FOREIGN KEY ("id_country") REFERENCES country("id_country"),
-                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic")
+                    FOREIGN KEY ("id_country") REFERENCES country("id_country") ON DELETE CASCADE,
+                    FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic") ON DELETE CASCADE
                           
                 );
             """)

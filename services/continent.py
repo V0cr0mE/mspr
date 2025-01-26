@@ -10,11 +10,16 @@ def get_all_continents():
     conn.close()
     return continents
 
-# Ajouter un continent
+# Ajouter un continent sans doublon
 def add_continent(continent_name):
     conn = connect_to_db()
     with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO Continent (continent) VALUES (%s)", (continent_name,))
+        cursor.execute("""
+            INSERT INTO Continent (continent) 
+            VALUES (%s) 
+            ON CONFLICT (continent) 
+            DO NOTHING;
+        """, (continent_name,))
     conn.commit()
     conn.close()
 
