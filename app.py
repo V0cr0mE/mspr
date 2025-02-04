@@ -32,7 +32,7 @@ def create_app():
     dash_app = dash.Dash(__name__, server=app, url_base_pathname='/')
 
     dash_app.layout = html.Div([
-        html.H1("Statistiques Pandémies", style={'textAlign': 'center', 'color': 'black'}),
+        html.H1("Statistiques Pandemic", style={'textAlign': 'center', 'color': 'black'}),
 
         
         dcc.Dropdown(id='country-dropdown', options=[], value=None, style={'width': '50%', 'margin': '20px auto'}),
