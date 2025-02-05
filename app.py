@@ -40,14 +40,14 @@ def create_app():
                 html.Label("Select Country", style={'fontSize': '18px', 'fontWeight': 'bold','color': 'white'}),
                 dcc.Dropdown(id='country-dropdown', options=[], value=None,
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
-            ], style={'width': '30%', 'padding': '10px'}),
+            ], style={'width': '15%', 'padding': '10px'}),
 
             
             html.Div([
                 html.Label("Select Pandemic", style={'fontSize': '18px', 'fontWeight': 'bold','color': 'white'}),
                 dcc.Dropdown(id='pandemic-dropdown', options=[], value=None,
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
-            ], style={'width': '30%', 'padding': '10px'}),
+            ], style={'width': '15%', 'padding': '10px'}),
 
            
             html.Div([
@@ -60,15 +60,13 @@ def create_app():
                     style={
                         'width': '100%',
                         'fontFamily': 'Arial, sans-serif',
-                        'borderRadius': '8px',
                         'border': '1px solid #ddd',
-                        'backgroundColor': '#2c3e50',
                         'boxShadow': '0 1px 3px rgba(0, 0, 0, 0.12)',
-                        'fontSize': '16px',
+                        'fontSize': '5px',
                         'display': 'flex',
                         'justifyContent': 'space-between',
                     },
-                    calendar_orientation='vertical',
+                    
                 ),
             ], ),
 
@@ -76,9 +74,9 @@ def create_app():
 
         
         html.Div(id='cards-container', style={'display': 'flex', 'flexWrap': 'wrap', 'gap': '20px', 'justifyContent': 'center', 'margin': '20px auto'}),
-
-       
-        dcc.Graph(id='recovery-trend', style={'width': '50%', 'margin': '40px auto','backgroundColor': 'rgba(0, 0, 0, 0)'})
+        dcc.Graph(id='continent-pie-chart', style={'width': '50%', 'margin': '40px'}),
+        dcc.Graph(id='recovery-trend', style={'width': '50%', 'margin': '40px','Color': 'black'})
+        
     ], style={
         'backgroundImage': 'url(https://mediclinic.scene7.com/is/image/mediclinic/hirslanden-corona-virus-teaser:1-1?_ck=1616227095797&wid=1050&hei=1050&dpr=off)',
         'backgroundSize': 'cover',
@@ -92,6 +90,9 @@ def create_app():
     def get_countries():
         response = requests.get('http://127.0.0.1:5000/country')
         return response.json() if response.status_code == 200 else []
+    def get_continents():
+        response = requests.get('http://127.0.0.1:5000/continent')
+        return response.json() if response.status_code == 200 else []
 
     def get_pandemics():
         response = requests.get('http://127.0.0.1:5000/pandemic')
@@ -99,6 +100,9 @@ def create_app():
 
     def get_daily_pandemic(id_country, id_pandemic):
         response = requests.get(f'http://127.0.0.1:5000/daily_pandemic_country/{id_country}/{id_pandemic}')
+        return response.json() if response.status_code == 200 else []
+    def get_pandemic_by_continent():
+        response = requests.get(f'http://127.0.0.1:5000/pandemic_country/continent')
         return response.json() if response.status_code == 200 else []
 
    
@@ -170,7 +174,45 @@ def create_app():
                       markers=True)
 
         fig.update_traces(line=dict(color='blue', width=2), marker=dict(size=6, color='red'))
+        fig.update_layout(
+          
+           plot_bgcolor='rgba(0, 0, 0, 0)',  # Couleur du fond du graphique
+           paper_bgcolor='rgba(0, 0, 0, 0)',  # Couleur de fond du cadre
+           font=dict(color='white'),
+           xaxis=dict(gridcolor='gray', color='white'),
+           yaxis=dict(gridcolor='gray', color='white')
+        )
         return fig
+        
+    
+    @dash_app.callback(
+       Output('continent-pie-chart', 'figure'),
+       [Input('country-dropdown', 'value')]
+    )
+    def update_continent_pie_chart(country_id):
+        continents = get_pandemic_by_continent()  
+
+        if not continents:
+            return px.pie(title="Aucune donnée disponible")
+    
+    
+        continent_names = [continent['continent'] for continent in continents]
+        continent_cases = [continent.get('cases', 0) for continent in continents]
+    
+        fig = px.pie(
+          names=continent_names,
+          values=continent_cases,
+          title="Répartition des Cas par Continent"
+        )
+      
+        fig.update_traces(textinfo='percent+label', pull=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        fig.update_layout(
+          plot_bgcolor='blue', 
+          paper_bgcolor='blue',
+          font=dict(color='white')
+        )
+        return fig
+
 
     return app
 

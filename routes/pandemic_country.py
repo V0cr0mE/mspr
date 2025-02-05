@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services.pandemic_country import get_all_pandemic_country, add_pandemic_country, delete_pandemic_country, update_pandemic_country,get_pandemic_country_by_id
+from services.pandemic_country import get_cases_by_continent, get_all_pandemic_country, add_pandemic_country, delete_pandemic_country, update_pandemic_country,get_pandemic_country_by_id
 
 bp = Blueprint('pandemic_country', __name__, url_prefix='/pandemic_country')
 
@@ -8,6 +8,11 @@ bp = Blueprint('pandemic_country', __name__, url_prefix='/pandemic_country')
 def get_pandemic_countries():
     pandemic_countries = get_all_pandemic_country()
     return jsonify(pandemic_countries)
+
+@bp.route('/continent', methods=['GET'])
+def cases_by_continent():
+    continent_cases = get_cases_by_continent()
+    return jsonify(continent_cases)
 
 # Route pour récupérer les données de pandémie par pays et id_pandemic
 @bp.route('/<int:id_country>/<int:id_pandemic>', methods=['GET'])
