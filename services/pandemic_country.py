@@ -57,12 +57,12 @@ def get_cases_by_continent():
             JOIN Continent c ON co."Id_continent" = c."Id_continent"
             WHERE p."id_pandemic" = 1
             GROUP BY c.continent
-            ORDER BY cases DESC;
+            ORDER BY cases DESC   
         """)
         rows = cursor.fetchall()
         continent_cases = [{"continent": row[0], "cases": row[1]} for row in rows]
-    conn.close()
     return continent_cases
+
 
 # Ajouter une entrée pour un pays et une pandémie
 def add_pandemic_country(id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
