@@ -94,6 +94,11 @@ def create_app():
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
             ], style={'width': '15%', 'padding': '10px'}),
             html.Div([
+                html.Label("Select Continent", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
+                dcc.Dropdown(id='continent-dropdown', options=[], value=None,
+                             style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
+            ], style={'width': '15%', 'padding': '10px'}),
+            html.Div([
                 html.Label("Select Date Range", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
                 dcc.DatePickerRange(
                     id='date-picker-range',
@@ -197,7 +202,14 @@ def create_app():
     def update_country_dropdown(value):
         countries = get_countries()
         return [{'label': country[1], 'value': country[0]} for country in countries]
-
+       # Callbacks pour les Dropdowns
+    @dash_app.callback(
+        Output('continent-dropdown', 'options'),
+        Input('continent-dropdown', 'value')
+    )
+    def update_continent_dropdown(value):
+        continents = get_continents()
+        return [{'label': continent['continent'], 'value': continent['id']} for continent in continents]
     @dash_app.callback(
         Output('pandemic-dropdown', 'options'),
         Input('pandemic-dropdown', 'value')
