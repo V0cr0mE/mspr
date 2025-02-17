@@ -14,13 +14,13 @@ from routes.country import bp as country_bp
 from routes.pandemic import bp as pandemic_bp
 from routes.pandemic_country import bp as pandemic_country_bp
 from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
-from etl.etl_generique import extract, transform, load  # Assurez-vous que ces fonctions soient accessibles
+from etl.etl_generique import extract, transform, load 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
 # Configuration pour l'upload de fichiers
-UPLOAD_FOLDER = 'donnes'  # Dossier où les fichiers seront stockés
+UPLOAD_FOLDER = 'donnes'  
 CLEAN_DATA_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
@@ -30,7 +30,7 @@ def allowed_file(filename):
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'votre_clé_secrète'
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER 
     
     # Crée le dossier 'donnes' s'il n'existe pas
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -55,6 +55,7 @@ def create_app():
             html.H2("Pandemic Statistics Dashboard", style={'color': 'white', 'margin': '0', 'padding': '10px', 'textAlign': 'center'}),
         ], style={'backgroundColor': 'rgba(0, 0, 0, 0)', 'padding': '10px'}),
 
+        # Formulaire d'upload de fichiers
         html.Div([
             html.H3("Uploader un fichier", style={'color': 'white', 'textAlign': 'center'}),
             dcc.Upload(
@@ -79,8 +80,8 @@ def create_app():
             ),
             html.Div(id='upload-status', style={'textAlign': 'center', 'color': 'white'})
         ], style={'margin': '20px'}),
-         
-        # Dropdown pour sélectionner le pays, la pandémie et le continent
+
+        # Dropdown pour sélectionner le pays et la pandémie
         html.Div([
             html.Div([
                 html.Label("Select Country", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
@@ -93,36 +94,45 @@ def create_app():
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
             ], style={'width': '15%', 'padding': '10px'}),
             html.Div([
-                html.Label("Select Continent", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
-                dcc.Dropdown(id='continent-dropdown', options=[], value=None,
-                             style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
-            ], style={'width': '15%', 'padding': '10px'}),
-            html.Div([
                 html.Label("Select Date Range", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
                 dcc.DatePickerRange(
                     id='date-picker-range',
                     start_date="2020-01-01",
                     end_date="2025-01-01",
                     display_format='YYYY-MM-DD',
-                    style={'width': '100%', 'borderRadius': '8px'}
-
-                )
-            ], style={'width': '30%', 'padding': '10px'}),
+                    style={
+                        'width': '100%',
+                        'fontFamily': 'Arial, sans-serif',
+                        'border': '1px solid #ddd',
+                        'boxShadow': '0 1px 3px rgba(0, 0, 0, 0.12)',
+                        'fontSize': '5px',
+                        'display': 'flex',
+                        'justifyContent': 'space-between',
+                    },
+                ),
+            ]),
         ], style={'display': 'flex', 'justifyContent': 'space-between', 'padding': '10px', 'backgroundColor': 'rgba(0, 0, 0, 0)', 'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)'}),
 
         # Graphiques
         html.Div(id='cards-container', style={'display': 'flex', 'flexWrap': 'wrap', 'gap': '20px', 'justifyContent': 'center', 'margin': '20px auto'}),
-        dcc.Graph(id='continent-pie-chart', style={'width': '50%', 'margin': '40px'}),
-        dcc.Graph(id='recovery-trend', style={'width': '50%', 'margin': '40px', 'Color': 'black'})
+        html.Div([
+            html.Div([
+                    dcc.Graph(id='continent-pie-chart', style={'width': '50%', 'display': 'inline-block'}),
+                    dcc.Graph(id='recovery-trend', style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'width': '100%'}),
+    
+            dcc.Graph(id='histogram', style={'width': '50%', 'margin': '40px auto', 'display': 'inline-block'})
+        ])
+
     ], style={
         'backgroundImage': 'url(https://mediclinic.scene7.com/is/image/mediclinic/hirslanden-corona-virus-teaser:1-1?_ck=1616227095797&wid=1050&hei=1050&dpr=off)',
         'backgroundSize': 'cover',
-        'backgroundPosition': 'center center',
-        'minHeight': '100vh',
+        'backgroundPosition': 'center',
+        'minHeight': '200vh',
         'fontFamily': 'Arial, sans-serif',
         'backgroundColor': 'rgba(0, 0, 0, 0)'
     })
-
+    
     # Callback pour gérer l'upload de fichiers
     @dash_app.callback(
         Output('upload-status', 'children'),
@@ -144,24 +154,14 @@ def create_app():
         with open(filepath, 'wb') as f:
             f.write(decoded)
 
-        file_type_map = {
-            "worldometer_coronavirus_daily_data.csv": "worldometer_daily",
-            "worldometer_coronavirus_summary_data.csv": "worldometer_summary",
-            "owid-monkeypox-data.csv": "monkeypox"
-        }
-        
-        file_type = file_type_map.get(filename)
-
-        if file_type is None:
-            return "Type de fichier non reconnu. Veuillez télécharger un fichier valide."
-
         # Appel de la logique ETL pour transformer les données
         raw_data = extract(filepath)
         if raw_data is not None:
+            file_type = filename.rsplit('.', 1)[0].replace(" ", "_") 
             cleaned_data = transform(raw_data, file_type)
 
-            # Spécifiez le chemin et le nom du fichier de sortie
-            output_file = os.path.join(CLEAN_DATA_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
+            
+            output_file = os.path.join(CLEAN_DATA_FOLDER, f"{file_type}_clean.csv")
             load(cleaned_data, output_file)  
 
             return f"Fichier '{filename}' uploadé avec succès et transformé dans '{output_file}' !"
@@ -186,7 +186,7 @@ def create_app():
         return response.json() if response.status_code == 200 else []
 
     def get_pandemic_by_continent():
-        response = requests.get('http://127.0.0.1:5000/pandemic_country/continent')
+        response = requests.get(f'http://127.0.0.1:5000/pandemic_country/continent')
         return response.json() if response.status_code == 200 else []
 
     # Callbacks pour les Dropdowns
@@ -199,14 +199,6 @@ def create_app():
         return [{'label': country[1], 'value': country[0]} for country in countries]
 
     @dash_app.callback(
-        Output('continent-dropdown', 'options'),
-        Input('continent-dropdown', 'value')
-    )
-    def update_continent_dropdown(value):
-        continents = get_continents()
-        return [{'label': continent['continent'], 'value': continent['id']} for continent in continents]
-
-    @dash_app.callback(
         Output('pandemic-dropdown', 'options'),
         Input('pandemic-dropdown', 'value')
     )
@@ -217,10 +209,9 @@ def create_app():
     @dash_app.callback(
         Output('cards-container', 'children'),
         [Input('country-dropdown', 'value'),
-         Input('pandemic-dropdown', 'value'),
-         Input('continent-dropdown', 'value')]
+         Input('pandemic-dropdown', 'value')]
     )
-    def update_cards(country_id, pandemic_id, continent_id):
+    def update_cards(country_id, pandemic_id):
         if not country_id or not pandemic_id:
             return html.P("Veuillez sélectionner un pays et une pandémie.", style={'textAlign': 'center', 'color': 'white'})
 
@@ -268,8 +259,8 @@ def create_app():
 
         fig.update_traces(line=dict(color='blue', width=2), marker=dict(size=6, color='red'))
         fig.update_layout(
-            plot_bgcolor='rgba(0, 0, 0, 0)',  # Couleur du fond du graphique
-            paper_bgcolor='rgba(0, 0, 0, 0)',  # Couleur de fond du cadre
+            plot_bgcolor='blue',  
+            paper_bgcolor='blue',  
             font=dict(color='white'),
             xaxis=dict(gridcolor='gray', color='white'),
             yaxis=dict(gridcolor='gray', color='white')
@@ -278,9 +269,9 @@ def create_app():
 
     @dash_app.callback(
         Output('continent-pie-chart', 'figure'),
-        [Input('continent-dropdown', 'value')]
+        [Input('country-dropdown', 'value')]
     )
-    def update_continent_pie_chart(continent_id):
+    def update_continent_pie_chart(country_id):
         continents = get_pandemic_by_continent()
 
         if not continents:
@@ -296,6 +287,30 @@ def create_app():
         )
 
         fig.update_traces(textinfo='percent+label', pull=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        fig.update_layout(
+            plot_bgcolor='blue',
+            paper_bgcolor='blue',
+            font=dict(color='white')
+        )
+        return fig
+    @dash_app.callback(
+        Output('histogram', 'figure'),
+        [Input('country-dropdown', 'value'),
+         Input('pandemic-dropdown', 'value')]
+    )
+    def update_histogram(country_id, pandemic_id):
+        if not country_id or not pandemic_id:
+            return px.histogram()
+        
+        data = get_daily_pandemic(country_id, pandemic_id)
+        df = pd.DataFrame(data)
+        
+        if df.empty:
+            return px.histogram()
+        
+        fig = px.histogram(df, x='date', y='daily_new_cases', title='Histogramme des cas quotidiens', nbins=30
+        )
+        fig.update_traces(marker=dict(color='red'))
         fig.update_layout(
             plot_bgcolor='blue',
             paper_bgcolor='blue',
