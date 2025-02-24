@@ -4,7 +4,13 @@ import os
 # Extraction
 def extract(file_path):
     try:
-        data = pd.read_csv(file_path)
+        if file_path.endswith(".csv"):
+            data = pd.read_csv(file_path)
+        elif file_path.endswith(".json"):
+            data = pd.read_json(file_path)
+        else:
+            print(f"Format de fichier non supporté: {file_path}")
+            return None
         print(f"Extraction réussie pour {file_path}")
         return data
     except Exception as e:
@@ -16,13 +22,16 @@ def transform(data, file_type):
     try:
         if file_type == "worldometer_daily":
             data['country'] = data['country'].str.strip().str.replace(" ", "_")
+            data['country'] = data['country'].str.lower() 
             data['date'] = pd.to_datetime(data['date'], errors='coerce')
             numeric_columns = ['cumulative_total_cases', 'daily_new_cases', 'active_cases', 
                                'cumulative_total_deaths', 'daily_new_deaths']
         
         elif file_type == "worldometer_summary":
             data['country'] = data['country'].str.replace(" ", "_")
+            data['country'] = data['country'].str.lower() 
             data['continent'] = data['continent'].str.replace(" ", "_")
+            data['continent'] = data['continent'].str.lower()  
             numeric_columns = ['total_confirmed', 'total_deaths', 'total_recovered', 
                                'active_cases', 'serious_or_critical', 
                                'total_cases_per_1m_population', 'total_deaths_per_1m_population', 
@@ -39,6 +48,7 @@ def transform(data, file_type):
                                                        "Vietnam": "Viet_Nam", "Bosnia and Herzegovina": "Bosnia_And_Herzegovina", 
                                                        "Czechia": "Czech_Republic"})
             data['country'] = data['country'].str.replace(" ", "_")
+            data['country'] = data['country'].str.lower()
             numeric_columns = ['total_cases', 'total_deaths', 'daily_new_cases', 'daily_new_deaths', 
                                'new_cases_smoothed', 'new_deaths_smoothed', 'new_cases_per_million',
                                'total_cases_per_million', 'new_cases_smoothed_per_million', 
@@ -51,6 +61,8 @@ def transform(data, file_type):
         
         data[numeric_columns] = data[numeric_columns].fillna(0)
         data[numeric_columns] = data[numeric_columns].astype('int64')
+        data = data.drop_duplicates() 
+        data[numeric_columns] = data[numeric_columns].apply(lambda x: x.clip(lower=0))
         print(f"Transformation réussie pour {file_type}")
         return data
     except Exception as e:

@@ -159,14 +159,24 @@ def create_app():
         with open(filepath, 'wb') as f:
             f.write(decoded)
 
+        file_type_map = {
+            "worldometer_coronavirus_daily_data.csv": "worldometer_daily",
+            "worldometer_coronavirus_summary_data.csv": "worldometer_summary",
+            "owid-monkeypox-data.csv": "monkeypox"
+        }
+        
+        file_type = file_type_map.get(filename)
+
+        if file_type is None:
+            return "Type de fichier non reconnu. Veuillez télécharger un fichier valide."
+
         # Appel de la logique ETL pour transformer les données
         raw_data = extract(filepath)
         if raw_data is not None:
-            file_type = filename.rsplit('.', 1)[0].replace(" ", "_") 
             cleaned_data = transform(raw_data, file_type)
 
-            
-            output_file = os.path.join(CLEAN_DATA_FOLDER, f"{file_type}_clean.csv")
+            # Spécifiez le chemin et le nom du fichier de sortie
+            output_file = os.path.join(CLEAN_DATA_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
             load(cleaned_data, output_file)  
 
             return f"Fichier '{filename}' uploadé avec succès et transformé dans '{output_file}' !"
