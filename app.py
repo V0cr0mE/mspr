@@ -15,6 +15,8 @@ from routes.pandemic import bp as pandemic_bp
 from routes.pandemic_country import bp as pandemic_country_bp
 from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
 from etl.etl_generique import extract, transform, load 
+from services.continent import get_all_continents
+from services.country import get_all_countries
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
@@ -185,12 +187,15 @@ def create_app():
 
     # Fonctions pour récupérer les données
     def get_countries():
-        response = requests.get('http://127.0.0.1:5000/country')
-        return response.json() if response.status_code == 200 else []
+        # response = requests.get('http://127.0.0.1:5000/country')
+        # return response.json() if response.status_code == 200 else []
+        return get_all_countries()
 
     def get_continents():
-        response = requests.get('http://127.0.0.1:5000/continent')
-        return response.json() if response.status_code == 200 else []
+        #response = requests.get('http://127.0.0.1:5000/continent')
+        #return response.json() if response.status_code == 200 else []
+        return get_all_continents()
+        
 
     def get_pandemics():
         response = requests.get('http://127.0.0.1:5000/pandemic')

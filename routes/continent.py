@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from services.continent import get_all_continents, add_continent, delete_continent, update_continent
 
 bp = Blueprint('continent', __name__, url_prefix='/continent')
@@ -30,3 +30,8 @@ def update_continent_route(id):
     continent_name = data.get('continent')
     update_continent(id, continent_name)
     return jsonify({"message": "Continent mis à jour avec succès"}), 200
+
+
+@bp.route("/index/test",  methods=['GET'])
+def index():
+    return render_template('index.html')
