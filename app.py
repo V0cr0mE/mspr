@@ -21,7 +21,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
 # Configuration pour l'upload de fichiers
 UPLOAD_FOLDER = 'donnes'  
-CLEAN_DATA_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
+CLEAN_DATA_FOLDER = '../donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
 def allowed_file(filename):

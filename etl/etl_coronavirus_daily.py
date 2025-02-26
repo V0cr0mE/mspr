@@ -56,8 +56,8 @@ def load(data, output_file):
         print(f"Erreur lors de l'enregistrement : {e}")
 
 if __name__ == "__main__":
-    input_file = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_daily_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_daily_clean.csv"
+    input_file = "../donnes/worldometer_coronavirus_daily_data.csv"
+    output_file = "../donnes_clean/worldometer_coronavirus_daily_clean.csv"
 
     # Processus ETL
 

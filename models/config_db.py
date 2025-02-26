@@ -1,15 +1,17 @@
 import psycopg2
-
 # Paramètres de connexion à la base de données
 host = "localhost"
 dbname = "covid"
 user = "postgres"
-password = "msprepsi"
-port = "5432"
+password = "Chichibald76."
+port = "5433"
+
+print("Connexion réussie à la base de données.")
 
 # Fonction de connexion à la base de données
 def connect_to_db():
     try:
+        print("Try Connexion réussie à la base de données.")
         conn = psycopg2.connect(
             host=host,
             dbname=dbname,
@@ -19,6 +21,6 @@ def connect_to_db():
         )
         print("Connexion réussie à la base de données.")
         return conn
-    except Exception as e:
+    except BaseException as e:
         print(f"Erreur de connexion : {e}")
         exit()

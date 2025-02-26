@@ -51,7 +51,7 @@ def main():
     conn = connect_to_database()
 
     # Chemin vers le fichier de donnes
-    file_path = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
+    file_path = "../donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
 
     # Insertion des pays
     insert_countries(conn, file_path)

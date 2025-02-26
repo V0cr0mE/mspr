@@ -57,8 +57,8 @@ def load(data, output_file):
 # Processus principal
 if __name__ == "__main__":
     # Chemin du fichier source
-    file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_clean.csv"
+    file_path = "../donnes/worldometer_coronavirus_summary_data.csv"
+    output_file = "../donnes_clean/worldometer_coronavirus_summary_clean.csv"
 
     # Extraction
     raw_data = extract(file_path)
