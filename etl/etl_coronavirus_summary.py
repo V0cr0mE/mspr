@@ -1,72 +1,113 @@
 import pandas as pd
-from datetime import datetime
 import numpy as np
 
-# Extraction
 def extract(file_path):
-  
     try:
         data = pd.read_csv(file_path)
         print("Extraction réussie.")
         return data
     except Exception as e:
-        print(f"Erreur lors de l'extraction : {e}")
+        print(f"Erreur d'extraction : {e}")
         return None
 
-# Transformation
+
+def impute_total_deaths(data):
+    if {'total_confirmed', 'total_deaths'}.issubset(data.columns):
+        missing_mask = data['total_deaths'].isna() & data['total_confirmed'].notna()
+        for index in data[missing_mask].index:
+            confirmed = data.loc[index, 'total_confirmed']
+            similar = data[
+                (data['total_confirmed'].between(confirmed * 0.9, confirmed * 1.1)) &
+                (data['total_deaths'].notna())
+            ]
+            if not similar.empty:
+                data.at[index, 'total_deaths'] = similar['total_deaths'].median()
+            else:
+                global_rate = (data['total_deaths'] / data['total_confirmed']).median()
+                data.at[index, 'total_deaths'] = int(confirmed * global_rate)
+        print(f"total_deaths imputé pour {missing_mask.sum()} lignes.")
+    return data
+
+def impute_total_recovered(data):
+    if {'total_confirmed', 'total_deaths', 'total_recovered'}.issubset(data.columns):
+        mask = data['total_recovered'].isna() & data['total_confirmed'].notna() & data['total_deaths'].notna()
+        data.loc[mask, 'total_recovered'] = data['total_confirmed'] - data['total_deaths']
+        print(f"total_recovered imputé pour {mask.sum()} lignes.")
+    return data
+
+def correct_active_cases(data):
+    if {'total_confirmed', 'total_deaths', 'total_recovered'}.issubset(data.columns):
+        data['active_cases'] = data['total_confirmed'] - (data['total_deaths'] + data['total_recovered'])
+        print("active_cases recalculé.")
+    return data
+
+def impute_total_tests(data):
+    if {'total_tests', 'population'}.issubset(data.columns):
+        mask = data['total_tests'].isna() & data['population'].notna()
+        valid = data[data['total_tests'].notna() & data['population'].notna()]
+        tests_per_person = (valid['total_tests'] / valid['population']).median()
+        data.loc[mask, 'total_tests'] = data['population'] * tests_per_person
+        print(f"total_tests imputé pour {mask.sum()} lignes.")
+    return data
+
+# --- Suppression des colonnes redondantes ---
+def drop_redundant_columns(data):
+    cols_to_drop = [
+        'total_cases_per_1m_population',
+        'total_deaths_per_1m_population',
+        'total_tests_per_1m_population',
+        'serious_or_critical'
+    ]
+    existing_cols = [col for col in cols_to_drop if col in data.columns]
+    data.drop(columns=existing_cols, inplace=True)
+    if existing_cols:
+        print(f"Colonnes supprimées : {existing_cols}")
+    return data
+
+
+
+
+
 def transform(data):
-    
     try:
-        # Supprimer les espaces dans les noms de pays et de continents
         data['country'] = data['country'].str.replace(" ", "_")
         data['continent'] = data['continent'].str.replace(" ", "_")
+    
 
-        # Remplacer les valeurs numériques manquantes par 0
+       
+        data = impute_total_deaths(data)
+        data = impute_total_recovered(data)
+        data = correct_active_cases(data)
+        data = impute_total_tests(data)
+        data = drop_redundant_columns(data)
+
         numeric_columns = [
-            'total_confirmed', 'total_deaths', 'total_recovered', 
-            'active_cases', 'serious_or_critical', 
-            'total_cases_per_1m_population', 'total_deaths_per_1m_population', 
-            'total_tests', 'total_tests_per_1m_population', 'population'
+           'total_confirmed', 'total_deaths', 'total_recovered',
+           'active_cases', 'total_tests', 'population'
         ]
-        data[numeric_columns] = data[numeric_columns].fillna(0)
-
-        # S'assurer que les colonnes numériques sont de type bigint
         for col in numeric_columns:
-            data[col] = pd.to_numeric(data[col], errors='coerce').fillna(0).astype('int64')
+            if col in data.columns:
+                 data[col] = pd.to_numeric(data[col], errors='coerce').astype('int64')
 
-        # Vérifier et corriger les valeurs négatives
-        for col in numeric_columns:
-            data[col] = data[col].apply(lambda x: max(x, 0))
-
-        print("Nettoyage terminé avec succès.")
+        print("Transformation terminée.")
         return data
     except Exception as e:
-        print(f"Erreur lors du nettoyage des données : {e}")
+        print(f"Erreur de transformation : {e}")
         return None
 
-# Load
-def load(data, output_file):
-    
+def load_summary(data, output_file):
     try:
         data.to_csv(output_file, index=False)
-        print(f"Données sauvegardées dans le fichier : {output_file}")
+        print(f"Données sauvegardées dans : {output_file}")
     except Exception as e:
         print(f"Erreur lors de la sauvegarde : {e}")
 
-
-# Processus principal
 if __name__ == "__main__":
-    # Chemin du fichier source
     file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_clean.csv"
+    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
 
-    # Extraction
     raw_data = extract(file_path)
-
-    # Transformation
     if raw_data is not None:
         cleaned_data = transform(raw_data)
-
-        # Load
         if cleaned_data is not None:
-            load(cleaned_data, output_file)
+            load_summary(cleaned_data, output_file)

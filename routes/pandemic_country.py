@@ -34,16 +34,11 @@ def add_new_pandemic_country():
     total_deaths = data.get('total_deaths')
     total_recovered = data.get('total_recovered')
     active_cases = data.get('active_cases')
-    serious_or_critical = data.get('serious_or_critical')
     total_tests = data.get('total_tests')
-    total_tests_per_1m_population = data.get('total_tests_per_1m_population')
-    total_deaths_per_1m_population = data.get('total_deaths_per_1m_population')
-    total_cases_per_1m_population = data.get('total_cases_per_1m_population')
+
 
     add_pandemic_country(id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
-                         active_cases, serious_or_critical, total_tests,
-                         total_tests_per_1m_population, total_deaths_per_1m_population,
-                         total_cases_per_1m_population)
+                         active_cases, total_tests)
     return jsonify({"message": "Données de pandémie ajoutées avec succès"}), 201
 
 # Route pour supprimer une entrée pour un pays et une pandémie
@@ -60,14 +55,9 @@ def update_pandemic_country_route(id_country, id_pandemic):
     total_deaths = data.get('total_deaths')
     total_recovered = data.get('total_recovered')
     active_cases = data.get('active_cases')
-    serious_or_critical = data.get('serious_or_critical')
     total_tests = data.get('total_tests')
-    total_tests_per_1m_population = data.get('total_tests_per_1m_population')
-    total_deaths_per_1m_population = data.get('total_deaths_per_1m_population')
-    total_cases_per_1m_population = data.get('total_cases_per_1m_population')
+
 
     update_pandemic_country(id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
-                            active_cases, serious_or_critical, total_tests,
-                            total_tests_per_1m_population, total_deaths_per_1m_population,
-                            total_cases_per_1m_population)
+                            active_cases,total_tests)
     return jsonify({"message": "Données de pandémie mises à jour avec succès"}), 200

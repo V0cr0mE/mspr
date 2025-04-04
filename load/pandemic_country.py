@@ -23,12 +23,7 @@ def insert_pandemic_country_data(conn, file_path):
                     total_deaths = row['total_deaths']
                     total_recovered = row['total_recovered']
                     active_cases = row['active_cases']
-                    serious_or_critical = row['serious_or_critical']
                     total_tests = row['total_tests']
-                    total_tests_per_1m_population = row['total_tests_per_1m_population']
-                    total_deaths_per_1m_population = row['total_deaths_per_1m_population']
-                    total_cases_per_1m_population = row['total_cases_per_1m_population']
-                    
                     # Récupérer l'ID du country
                     cursor.execute("""SELECT "id_country" FROM country WHERE "country" = %s""", (country_name,))
                     country_id = cursor.fetchone()
@@ -40,17 +35,15 @@ def insert_pandemic_country_data(conn, file_path):
                         insert_query = """
                             INSERT INTO pandemic_country (
                                 "id_country", "id_pandemic", "total_confirmed", "total_deaths", "total_recovered",
-                                "active_cases", "serious_or_critical", "total_tests", 
-                                "total_tests_per_1m_population", "total_deaths_per_1m_population", "total_cases_per_1m_population"
+                                "active_cases","total_tests"
                             )
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
                             ON CONFLICT ("id_country", "id_pandemic") DO NOTHING
                             
                         """
                         cursor.execute(insert_query, (
                             country_id, 1, total_confirmed, total_deaths, total_recovered,
-                            active_cases, serious_or_critical, total_tests,
-                            total_tests_per_1m_population, total_deaths_per_1m_population, total_cases_per_1m_population
+                            active_cases,total_tests
                         ))
                     else:
                         print(f"Pays non trouvé pour les données : {country_name}, insertion ignorée.")

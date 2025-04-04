@@ -14,7 +14,7 @@ from routes.country import bp as country_bp
 from routes.pandemic import bp as pandemic_bp
 from routes.pandemic_country import bp as pandemic_country_bp
 from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
-from etl.etl_generique import extract, transform, load 
+# from etl.etl_generique import extract, transform, load 
 from services.continent import get_all_continents
 from services.country import get_all_countries
 
@@ -148,42 +148,42 @@ def create_app():
         prevent_initial_call=True
     )
     
-    def handle_upload(contents, filename):
-        if contents is None or filename is None:
-            return "Aucun fichier sélectionné."
+    # def handle_upload(contents, filename):
+    #     if contents is None or filename is None:
+    #         return "Aucun fichier sélectionné."
 
-        # Décoder le fichier
-        _, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
+    #     # Décoder le fichier
+    #     _, content_string = contents.split(',')
+    #     decoded = base64.b64decode(content_string)
 
-        # Sauvegarder le fichier dans le dossier 'donnes'
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)) 
-        with open(filepath, 'wb') as f:
-            f.write(decoded)
+    #     # Sauvegarder le fichier dans le dossier 'donnes'
+    #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)) 
+    #     with open(filepath, 'wb') as f:
+    #         f.write(decoded)
 
-        file_type_map = {
-            "worldometer_coronavirus_daily_data.csv": "worldometer_daily",
-            "worldometer_coronavirus_summary_data.csv": "worldometer_summary",
-            "owid-monkeypox-data.csv": "monkeypox"
-        }
+    #     file_type_map = {
+    #         "worldometer_coronavirus_daily_data.csv": "worldometer_daily",
+    #         "worldometer_coronavirus_summary_data.csv": "worldometer_summary",
+    #         "owid-monkeypox-data.csv": "monkeypox"
+    #     }
         
-        file_type = file_type_map.get(filename)
+    #     file_type = file_type_map.get(filename)
 
-        if file_type is None:
-            return "Type de fichier non reconnu. Veuillez télécharger un fichier valide."
+    #     if file_type is None:
+    #         return "Type de fichier non reconnu. Veuillez télécharger un fichier valide."
 
-        # Appel de la logique ETL pour transformer les données
-        raw_data = extract(filepath)
-        if raw_data is not None:
-            cleaned_data = transform(raw_data, file_type)
+    #     # Appel de la logique ETL pour transformer les données
+    #     raw_data = extract(filepath)
+    #     if raw_data is not None:
+    #         cleaned_data = transform(raw_data, file_type)
 
-            # Spécifiez le chemin et le nom du fichier de sortie
-            output_file = os.path.join(CLEAN_DATA_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
-            load(cleaned_data, output_file)  
+    #         # Spécifiez le chemin et le nom du fichier de sortie
+    #         output_file = os.path.join(CLEAN_DATA_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
+    #         load(cleaned_data, output_file)  
 
-            return f"Fichier '{filename}' uploadé avec succès et transformé dans '{output_file}' !"
-        else:
-            return "Erreur lors de l'extraction des données."
+    #         return f"Fichier '{filename}' uploadé avec succès et transformé dans '{output_file}' !"
+    #     else:
+    #         return "Erreur lors de l'extraction des données."
 
     # Fonctions pour récupérer les données
     def get_countries():
