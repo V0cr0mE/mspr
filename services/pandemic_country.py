@@ -13,7 +13,7 @@ def get_all_pandemic_country():
             "total_deaths": row[3],
             "total_recovered": row[4],
             "active_cases": row[5],
-            "total_tests": row[7]
+            "total_tests": row[6]
 
         } for row in rows]
     conn.close()

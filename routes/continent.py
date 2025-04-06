@@ -6,6 +6,22 @@ bp = Blueprint('continent', __name__, url_prefix='/continent')
 # Route pour récupérer tous les continents
 @bp.route('', methods=['GET'])
 def get_continents():
+    """
+    Récupérer tous les continents
+    ---
+    responses:
+      200:
+        description: Liste des continents
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id_continent:
+                type: integer
+              name:
+                type: string
+    """
     continents = get_all_continents()
     return jsonify(continents)
 
