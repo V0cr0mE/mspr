@@ -74,20 +74,22 @@ def transform(data):
         return None
 
 # --- Chargement ---
-def load_monkeypox(data, output_file):
+def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données enregistrées dans : {output_file}")
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
-
-# --- Main ---
-if __name__ == "__main__":
-    input_file = "C:/Users/Anes/MSPR/donnes/owid-monkeypox-data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/owid-monkeypox-data_clean.csv"
-
-    raw_data = extract(input_file)
+        
+def process_monkeypox(file_path, output_file):
+    raw_data = extract(file_path)
     if raw_data is not None:
         cleaned_data = transform(raw_data)
         if cleaned_data is not None:
-            load_monkeypox(cleaned_data, output_file)
+            load(cleaned_data, output_file)
+
+if __name__ == "__main__":
+    input_file = "C:/Users/Anes/MSPR/donnes/owid-monkeypox-data.csv"
+    output_file = "C:/Users/Anes/MSPR/donnes_clean/owid-monkeypox-data_clean.csv"
+    process_monkeypox(input_file, output_file)
+

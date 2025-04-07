@@ -95,19 +95,23 @@ def transform(data):
         print(f"Erreur de transformation : {e}")
         return None
 
-def load_summary(data, output_file):
+def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données sauvegardées dans : {output_file}")
     except Exception as e:
         print(f"Erreur lors de la sauvegarde : {e}")
 
-if __name__ == "__main__":
-    file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
-
+def process_summary(file_path, output_file):
     raw_data = extract(file_path)
     if raw_data is not None:
         cleaned_data = transform(raw_data)
         if cleaned_data is not None:
-            load_summary(cleaned_data, output_file)
+            load(cleaned_data, output_file)
+
+
+if __name__ == "__main__":
+    file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
+    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
+    process_summary(file_path, output_file)
+    

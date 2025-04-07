@@ -1,22 +1,29 @@
 import os
-from etl_coronavirus_summary import load_summary
-from etl_coronavirus_daily import load_daily
-from etl_monkeypox import load_monkeypox
+from etl_coronavirus_summary import process_summary
+from etl_coronavirus_daily import process_daily
+from etl_monkeypox import process_monkeypox
+
+CLEAN_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
 
 def detect_and_process(file_path):
-    filename = os.path.basename(file_path).lower()
+    filename = os.path.basename(file_path)
+    print("Nom du fichier détecté :", filename)
 
-    if "worldometer_summary" in filename:
+    output_path = os.path.join(CLEAN_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
+
+    if "worldometer_coronavirus_summary" in filename:
         print("Fichier détecté : Données cumulées (summary)")
-        load_summary(file_path)
+        process_summary(file_path,output_path)
 
-    elif "worldometer_daily" in filename:
+        
+
+    elif "worldometer_coronavirus_daily" in filename:
         print("Fichier détecté : Données journalières (daily)")
-        load_daily(file_path)
+        process_daily(file_path,output_path)
 
     elif "monkeypox" in filename:
         print("Fichier détecté : Monkeypox")
-        load_monkeypox(file_path)
+        process_monkeypox(file_path,output_path)
 
     else:
         print("Type de fichier inconnu : aucun traitement associé.")

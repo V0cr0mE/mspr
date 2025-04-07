@@ -1,8 +1,11 @@
 import dash
-from dash import dcc, html, Input, Output, no_update
+from dash import dcc, html, Input, Output, no_update,State
 import pandas as pd
 import plotly.express as px
 import requests
+import base64
+import os
+from etl.etl_generique import detect_and_process
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
@@ -99,12 +102,12 @@ def init_dashboard(server):
     })
     
     # Callback pour gérer l'upload de fichiers
-    @dash_app.callback(
-        Output('upload-status', 'children'),
-        Input('upload-file', 'contents'),
-        Input('upload-file', 'filename'),
-        prevent_initial_call=True
-    )
+    # @dash_app.callback(
+    #     Output('upload-status', 'children'),
+    #     Input('upload-file', 'contents'),
+    #     Input('upload-file', 'filename'),
+    #     prevent_initial_call=True
+    # )
     
     # def handle_upload(contents, filename):
     #     if contents is None or filename is None:
@@ -144,6 +147,38 @@ def init_dashboard(server):
     #         return "Erreur lors de l'extraction des données."
 
     # Fonctions pour récupérer les données
+    
+    @dash_app.callback(
+       Output('upload-status', 'children'),
+       Input('upload-file', 'contents'),
+       State('upload-file', 'filename'),
+       prevent_initial_call=True
+    )
+    def handle_file_upload(contents, filename):
+       if contents and filename:
+
+
+          try:
+              # Crée le dossier s’il n’existe pas
+              os.makedirs("donnes", exist_ok=True)
+
+              # Décodage du fichier
+              content_type, content_string = contents.split(',')
+              decoded = base64.b64decode(content_string)
+              save_path = os.path.join("donnes", filename)
+
+              # Sauvegarde
+              with open(save_path, "wb") as f:
+                  f.write(decoded)
+
+              # Lancer le traitement ETL
+              detect_and_process(save_path)
+
+              return f"✅ Fichier « {filename} » chargé et traité avec succès."
+          except Exception as e:
+              return f"❌ Erreur pendant le traitement : {str(e)}"
+      
+
     def get_countries():
         response = requests.get('http://127.0.0.1:5000/country')
         return response.json() if response.status_code == 200 else []

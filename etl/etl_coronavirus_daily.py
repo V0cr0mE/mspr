@@ -49,20 +49,23 @@ def transform(data):
         return None
 
 # Load
-def load_daily(data, output_file):
+def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données enregistrées dans : {output_file}")
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
+        
+def process_daily(file_path, output_file):
+    raw_data = extract(file_path)
+    if raw_data is not None:
+        cleaned_data = transform(raw_data)
+        if cleaned_data is not None:
+            load(cleaned_data, output_file)
 
 # Main ETL process
 if __name__ == "__main__":
     input_file = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_daily_data.csv"
     output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
+    process_daily(input_file, output_file)
 
-    raw_data = extract(input_file)
-    if raw_data is not None:
-        cleaned_data = transform(raw_data)
-        if cleaned_data is not None:
-            load_daily(cleaned_data, output_file)
