@@ -4,11 +4,20 @@ import pandas as pd
 import plotly.express as px
 import requests
 import base64
-import os
 from etl.etl_generique import detect_and_process
+import base64
+from werkzeug.utils import secure_filename
+import os
+from load.continent import insert_continents
+from load.country import insert_countries
+from load.pandemic import insert_pandemics
+from load.daily_pandemic_country import insert_daily_pandemic_country_data
+from load.pandemic_country import insert_pandemic_country_data
+from models.config_db import connect_to_db
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
+    UPLOAD_FOLDER = "C:/Users/Anes/MSPR/donnes"
 
     dash_app.layout = html.Div([
         # Navigation
@@ -41,6 +50,8 @@ def init_dashboard(server):
             ),
             html.Div(id='upload-status', style={'textAlign': 'center', 'color': 'white'})
         ], style={'margin': '20px'}),
+        html.Button("Load", id='btn-load-all-db', n_clicks=0, style={'margin': '20px'}),
+        html.Div(id='load-all-status', style={'color': 'white', 'textAlign': 'center'}),
 
         # Dropdown pour sélectionner le pays et la pandémie
         html.Div([
@@ -101,83 +112,62 @@ def init_dashboard(server):
         'backgroundColor': 'rgba(0, 0, 0, 0)'
     })
     
-    # Callback pour gérer l'upload de fichiers
-    # @dash_app.callback(
-    #     Output('upload-status', 'children'),
-    #     Input('upload-file', 'contents'),
-    #     Input('upload-file', 'filename'),
-    #     prevent_initial_call=True
-    # )
-    
-    # def handle_upload(contents, filename):
-    #     if contents is None or filename is None:
-    #         return "Aucun fichier sélectionné."
+    @dash_app.callback(
+      Output('upload-status', 'children'),
+      Input('upload-file', 'contents'),
+      Input('upload-file', 'filename'),
+      prevent_initial_call=True
+    )
+    def handle_upload(contents, filename):
+       if contents is None or filename is None:
+          return "Aucun fichier sélectionné."
 
-    #     # Décoder le fichier
-    #     _, content_string = contents.split(',')
-    #     decoded = base64.b64decode(content_string)
+       try:
+             # Décodage base64
+             content_type, content_string = contents.split(',')
+             decoded = base64.b64decode(content_string)
 
-    #     # Sauvegarder le fichier dans le dossier 'donnes'
-    #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)) 
-    #     with open(filepath, 'wb') as f:
-    #         f.write(decoded)
+             # Enregistrement temporaire
+             filepath = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
+             with open(filepath, "wb") as f:
+                f.write(decoded)
 
-    #     file_type_map = {
-    #         "worldometer_coronavirus_daily_data.csv": "worldometer_daily",
-    #         "worldometer_coronavirus_summary_data.csv": "worldometer_summary",
-    #         "owid-monkeypox-data.csv": "monkeypox"
-    #     }
-        
-    #     file_type = file_type_map.get(filename)
+             # Traitement automatique avec l'ETL générique
+             detect_and_process(filepath)
 
-    #     if file_type is None:
-    #         return "Type de fichier non reconnu. Veuillez télécharger un fichier valide."
+             return f"fichier '{filename}' chargé et traité avec succès."
 
-    #     # Appel de la logique ETL pour transformer les données
-    #     raw_data = extract(filepath)
-    #     if raw_data is not None:
-    #         cleaned_data = transform(raw_data, file_type)
+       except Exception as e:
+         return f"Erreur lors du traitement du fichier : {e}"
+     
+    def charger_toutes_les_tables():
+      try:
+          conn = connect_to_db()
 
-    #         # Spécifiez le chemin et le nom du fichier de sortie
-    #         output_file = os.path.join(CLEAN_DATA_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
-    #         load(cleaned_data, output_file)  
+          base_path = "C:/Users/Anes/MSPR/donnes_clean/"
 
-    #         return f"Fichier '{filename}' uploadé avec succès et transformé dans '{output_file}' !"
-    #     else:
-    #         return "Erreur lors de l'extraction des données."
+          insert_continents(conn, f"{base_path}worldometer_coronavirus_summary_data_clean.csv")
+          insert_countries(conn, f"{base_path}worldometer_coronavirus_summary_data_clean.csv")
+          insert_pandemics(conn)
+          insert_daily_pandemic_country_data(conn, f"{base_path}worldometer_coronavirus_daily_data_clean.csv",1)
+          insert_daily_pandemic_country_data(conn, f"{base_path}worldometer_coronavirus_daily_data_clean.csv",2)
+          insert_pandemic_country_data(conn, f"{base_path}worldometer_coronavirus_summary_data_clean.csv")
 
-    # Fonctions pour récupérer les données
+          conn.close()
+          return "Toutes les données ont été insérées dans la base avec succès !"
+
+      except Exception as e:
+        return f"Erreur lors de l'insertion : {str(e)}"
     
     @dash_app.callback(
-       Output('upload-status', 'children'),
-       Input('upload-file', 'contents'),
-       State('upload-file', 'filename'),
-       prevent_initial_call=True
+      Output('load-all-status', 'children'),
+      Input('btn-load-all-db', 'n_clicks'),
+      prevent_initial_call=True
     )
-    def handle_file_upload(contents, filename):
-       if contents and filename:
-
-
-          try:
-              # Crée le dossier s’il n’existe pas
-              os.makedirs("donnes", exist_ok=True)
-
-              # Décodage du fichier
-              content_type, content_string = contents.split(',')
-              decoded = base64.b64decode(content_string)
-              save_path = os.path.join("donnes", filename)
-
-              # Sauvegarde
-              with open(save_path, "wb") as f:
-                  f.write(decoded)
-
-              # Lancer le traitement ETL
-              detect_and_process(save_path)
-
-              return f"✅ Fichier « {filename} » chargé et traité avec succès."
-          except Exception as e:
-              return f"❌ Erreur pendant le traitement : {str(e)}"
-      
+    def handle_load_all(n_clicks):
+      if n_clicks:
+          return charger_toutes_les_tables()
+      return dash.no_update
 
     def get_countries():
         response = requests.get('http://127.0.0.1:5000/country')

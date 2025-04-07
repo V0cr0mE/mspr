@@ -1,7 +1,7 @@
 import os
-from etl_coronavirus_summary import process_summary
-from etl_coronavirus_daily import process_daily
-from etl_monkeypox import process_monkeypox
+from etl.etl_coronavirus_summary import process_summary
+from etl.etl_coronavirus_daily import process_daily
+from etl.etl_monkeypox import process_monkeypox
 
 CLEAN_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
 
