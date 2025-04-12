@@ -21,7 +21,8 @@ def transform(data):
         data.rename(columns={
             'new_cases': 'daily_new_cases',
             'new_deaths': 'daily_new_deaths',
-            'location': 'country'
+            'location': 'country',
+            'total_cases':'active_cases'
         }, inplace=True)
 
         # Suppression des continents et agrégats globaux
@@ -57,7 +58,7 @@ def transform(data):
             print(f"Colonne supprimée (redondante) : {col}")
 
         # Conversion en entier pour les compteurs
-        int_cols = ['total_cases', 'total_deaths', 'daily_new_cases', 'daily_new_deaths']
+        int_cols = ['total_cases', 'total_deaths', 'daily_new_cases', 'daily_new_deaths','active_cases']
         for col in int_cols:
             if col in data.columns:
                 data[col] = data[col].astype('int64')

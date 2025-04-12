@@ -1,4 +1,4 @@
-country,date,total_cases,total_deaths,daily_new_cases,daily_new_deaths
+country,date,active_cases,total_deaths,daily_new_cases,daily_new_deaths
 Andorra,2022-07-25,2,0,2,0
 Andorra,2022-07-26,3,0,1,0
 Andorra,2022-07-27,3,0,0,0

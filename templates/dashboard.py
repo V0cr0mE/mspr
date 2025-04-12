@@ -71,6 +71,27 @@ def init_dashboard(server):
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
             ], style={'width': '15%', 'padding': '10px'}),
             html.Div([
+                html.Label("Type of statistic", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
+                dcc.Dropdown(
+                    id='stat-type-dropdown',
+                    options=[
+                        {'label': 'Deaths', 'value': 'daily_new_deaths'},
+                        {'label': 'Cases', 'value': 'daily_new_cases'},
+                       
+                    ],
+                    value='daily_new_cases',
+                    style={
+                       'width': '100%',
+                       'fontFamily': 'Arial, sans-serif',
+                       'borderRadius': '8px',
+                       'border': '1px solid #ddd'
+                    }
+                ),
+            ], style={'width': '15%', 'padding': '10px'}),
+
+            
+            
+            html.Div([
                 html.Label("Select Date Range", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
                 dcc.DatePickerRange(
                     id='date-picker-range',
@@ -159,6 +180,7 @@ def init_dashboard(server):
       except Exception as e:
         return f"Erreur lors de l'insertion : {str(e)}"
     
+    
     @dash_app.callback(
       Output('load-all-status', 'children'),
       Input('btn-load-all-db', 'n_clicks'),
@@ -217,22 +239,53 @@ def init_dashboard(server):
     @dash_app.callback(
         Output('cards-container', 'children'),
         [Input('country-dropdown', 'value'),
-         Input('pandemic-dropdown', 'value')]
+         Input('pandemic-dropdown', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date')]
     )
-    def update_cards(country_id, pandemic_id):
+    def update_cards(country_id, pandemic_id,start_date,end_date):
         if not country_id or not pandemic_id:
             return html.P("Veuillez sélectionner un pays et une pandémie.", style={'textAlign': 'center', 'color': 'white'})
 
         response = requests.get(f'http://127.0.0.1:5000/pandemic_country/{country_id}/{pandemic_id}')
         if response.status_code == 200:
             data = response.json()
+     
+           
+            total_deaths = data.get('total_deaths', 0)
+            total_confirmed = data.get('total_confirmed', 0)
+            population = data.get('population', 0)
+
+            mortality_rate = (total_deaths / total_confirmed * 100) if total_confirmed else 0
+
+            
+            daily_data = get_daily_pandemic(country_id, pandemic_id)
+            if daily_data:
+               df_daily = pd.DataFrame(daily_data)
+               df_daily['date'] = pd.to_datetime(df_daily['date'])
+               df_filtered = df_daily[(df_daily['date'] >= start_date) & (df_daily['date'] <= end_date)]
+               incidence = df_filtered['daily_new_cases'].sum()
+               prevalence = df_filtered['active_cases'].mean()
+               transmission_rate = (incidence / prevalence * 100)
+            else:
+              transmission_rate = 0
+            print(incidence)
+            print(prevalence)
             cards = [
                 html.Div([html.H3("Total Deaths"), html.P(f"{data.get('total_deaths', 0)}")],
                          style={'border': '1px solid #d04e47', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)', 'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#e67e22', 'font-weight': 'bold', 'font-size': '20px'}),
                 html.Div([html.H3("Total Cases"), html.P(f"{data.get('total_confirmed', 0)}")],
                          style={'border': '1px solid #e67e22', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)', 'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#5b8fd4', 'font-weight': 'bold', 'font-size': '20px'}),
                 html.Div([html.H3("Total Recovered"), html.P(f"{data.get('total_recovered', 0)}")],
-                         style={'border': '1px solid #2ecc71', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)', 'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#27ae60', 'font-size': '20px', 'font-weight': 'bold'})
+                         style={'border': '1px solid #2ecc71', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)', 'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#27ae60', 'font-size': '20px', 'font-weight': 'bold'}),
+                html.Div([html.H3("Transmission Rate"), html.P(f"{transmission_rate:.2f}%")],
+                     style={'border': '1px solid #3498db', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)',
+                            'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#3498db',
+                            'font-size': '20px', 'font-weight': 'bold'}),
+                html.Div([html.H3("Mortality Rate"), html.P(f"{mortality_rate:.2f}%")],
+                     style={'border': '1px solid #c0392b', 'padding': '10px', 'width': '200px', 'backgroundColor': 'rgba(0, 0, 0, 0)',
+                            'backdrop-filter': 'blur(50px)', 'borderRadius': '10px', 'textAlign': 'center', 'color': '#c0392b',
+                            'font-size': '20px', 'font-weight': 'bold'})
             ]
             return cards
         return html.P("Données non trouvées.", style={'textAlign': 'center', 'color': 'black'})
@@ -242,10 +295,11 @@ def init_dashboard(server):
         [Input('country-dropdown', 'value'),
          Input('pandemic-dropdown', 'value'),
          Input('date-picker-range', 'start_date'),
-         Input('date-picker-range', 'end_date')]
+         Input('date-picker-range', 'end_date'),
+         Input('stat-type-dropdown', 'value')]
     )
-    def update_recovery_graph(country_id, pandemic_id, start_date, end_date):
-        if not country_id or not pandemic_id:
+    def update_recovery_graph(country_id, pandemic_id, start_date, end_date,stat_type):
+        if not country_id or not pandemic_id or not stat_type:
             return px.line(title="Sélectionnez un pays et une pandémie")
 
         data = get_daily_pandemic(country_id, pandemic_id)
@@ -257,12 +311,12 @@ def init_dashboard(server):
 
         df_filtered = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
 
-        if 'daily_new_cases' not in df_filtered.columns:
-            return px.line(title="Données manquantes")
+        if stat_type not in df_filtered.columns:
+            return px.line(title="Données manquantes {stat_type}")
 
-        fig = px.line(df_filtered, x='date', y='daily_new_cases',
-                      title="Évolution du Nombre de Cas Quotidiens",
-                      labels={'daily_new_cases': 'Cas quotidiens', 'date': 'Date'},
+        fig = px.line(df_filtered, x='date', y=stat_type,
+                      title=f"Évolution de {stat_type.replace('_', ' ').capitalize()}",
+                      labels={stat_type: stat_type.replace('_', ' ').capitalize(), 'date': 'Date'},
                       markers=True)
 
         fig.update_traces(line=dict(color='blue', width=2), marker=dict(size=6, color='red'))
@@ -304,10 +358,11 @@ def init_dashboard(server):
     @dash_app.callback(
         Output('histogram', 'figure'),
         [Input('country-dropdown', 'value'),
-         Input('pandemic-dropdown', 'value')]
+         Input('pandemic-dropdown', 'value'),
+         Input('stat-type-dropdown', 'value')]
     )
-    def update_histogram(country_id, pandemic_id):
-        if not country_id or not pandemic_id:
+    def update_histogram(country_id, pandemic_id,stat_type):
+        if not country_id or not pandemic_id or not stat_type:
             return px.histogram()
         
         data = get_daily_pandemic(country_id, pandemic_id)
@@ -316,7 +371,7 @@ def init_dashboard(server):
         if df.empty:
             return px.histogram()
         
-        fig = px.histogram(df, x='date', y='daily_new_cases', title='Histogramme des cas quotidiens', nbins=30
+        fig = px.histogram(df, x='date', y=stat_type, title='Histogramme des {stat_type} quotidiens', nbins=30
         )
         fig.update_traces(marker=dict(color='red'))
         fig.update_layout(

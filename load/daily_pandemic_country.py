@@ -19,6 +19,7 @@ def insert_daily_pandemic_country_data(conn, file_path,pandemic_id):
                 for row in csv_reader:
                     country_name = row['country']
                     date = row['date']
+                    active_cases=row['active_cases']
                     daily_new_deaths = row['daily_new_deaths']
                     daily_new_cases = row['daily_new_cases']
                     
@@ -32,13 +33,13 @@ def insert_daily_pandemic_country_data(conn, file_path,pandemic_id):
                         
                         insert_query = """
                             INSERT INTO daily_pandemic_country (
-                                "id_country", "id_pandemic", "date", "daily_new_deaths", "daily_new_cases"
+                                "id_country", "id_pandemic", "date", "daily_new_deaths", "daily_new_cases","active_cases"
                             )
-                            VALUES (%s, %s, %s, %s, %s)
+                            VALUES (%s, %s, %s, %s, %s,%s)
                             ON CONFLICT DO NOTHING;                            
                         """
                         cursor.execute(insert_query, (
-                            country_id,pandemic_id, date, daily_new_deaths, daily_new_cases
+                            country_id,pandemic_id, date, daily_new_deaths, daily_new_cases,active_cases
                         ))
                     else:
                         print(f"Pays non trouvé pour les données : {country_name}, insertion ignorée.")
