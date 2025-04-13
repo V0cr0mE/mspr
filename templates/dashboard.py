@@ -36,8 +36,8 @@ def init_dashboard(server):
                 ]),
                 style={
                     'width': '50%',
-                    'height': '60px',
-                    'lineHeight': '60px',
+                    'height': '50px',
+                    'lineHeight': '50px',
                     'borderWidth': '1px',
                     'borderStyle': 'dashed',
                     'borderRadius': '5px',
@@ -48,26 +48,33 @@ def init_dashboard(server):
                 },
                 multiple=False
             ),
+            
             html.Div(id='upload-status', style={'textAlign': 'center', 'color': 'white'})
         ], style={'margin': '20px'}),
-        html.Button("Load", id='btn-load-all-db', n_clicks=0, style={'margin': '20px'}),
-        html.Div(id='load-all-status', style={'color': 'white', 'textAlign': 'center'}),
+        html.Div([
+            html.Button("Load", id='btn-load-all-db', n_clicks=0, style={
+               'margin': '20px auto',
+               'display': 'block',
+               'backgroundColor': '#3498db',
+               'color': 'white',
+               'padding': '10px 20px',
+               'borderRadius': '8px',
+               'border': 'none',
+               'fontWeight': 'bold',
+               'cursor': 'pointer'}),
+        ], style={'display': 'flex', 'justifyContent': 'center'}),
+        html.Div(id='load-all-status', style={'color': 'white', 'textAlign': 'center','backgroundColor': 'rgba(255, 255, 255, 0.1)'}),
 
         # Dropdown pour sélectionner le pays et la pandémie
         html.Div([
             html.Div([
                 html.Label("Select Country", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
-                dcc.Dropdown(id='country-dropdown', options=[], value=None,
+                dcc.Dropdown(id='country-dropdown', options=[], value=3,
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
             ], style={'width': '15%', 'padding': '10px'}),
             html.Div([
                 html.Label("Select Pandemic", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
-                dcc.Dropdown(id='pandemic-dropdown', options=[], value=None,
-                             style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
-            ], style={'width': '15%', 'padding': '10px'}),
-            html.Div([
-                html.Label("Select Continent", style={'fontSize': '18px', 'fontWeight': 'bold', 'color': 'white'}),
-                dcc.Dropdown(id='continent-dropdown', options=[], value=None,
+                dcc.Dropdown(id='pandemic-dropdown', options=[], value=1,
                              style={'width': '100%', 'fontFamily': 'Arial, sans-serif', 'borderRadius': '8px', 'border': '1px solid #ddd'}),
             ], style={'width': '15%', 'padding': '10px'}),
             html.Div([
@@ -118,9 +125,10 @@ def init_dashboard(server):
                     dcc.Graph(id='continent-pie-chart', style={'width': '50%', 'display': 'inline-block'}),
                     dcc.Graph(id='recovery-trend', style={'width': '50%', 'display': 'inline-block'})
             ], style={'display': 'flex', 'width': '100%'}),
-    
-            dcc.Graph(id='histogram', style={'width': '50%', 'margin': '40px auto', 'display': 'inline-block'}),
-            
+            html.Div([
+               dcc.Graph(id='histogram', style={'width': '50%','display': 'inline-block'}),
+               dcc.Graph(id='continent-bar-chart', style={'width': '50%','display': 'inline-block'}),
+            ], style={'display': 'flex', 'width': '100%'}),
         ])
         
 
@@ -196,9 +204,9 @@ def init_dashboard(server):
         return response.json() if response.status_code == 200 else []
        
 
-    def get_continents():
-        response = requests.get('http://127.0.0.1:5000/continent')
-        return response.json() if response.status_code == 200 else []
+    # def get_continents():
+    #     response = requests.get('http://127.0.0.1:5000/continent')
+    #     return response.json() if response.status_code == 200 else []
     
     def get_pandemics():
         response = requests.get('http://127.0.0.1:5000/pandemic')
@@ -221,13 +229,6 @@ def init_dashboard(server):
         countries = get_countries()
         return [{'label': country[1], 'value': country[0]} for country in countries]
        # Callbacks pour les Dropdowns
-    @dash_app.callback(
-        Output('continent-dropdown', 'options'),
-        Input('continent-dropdown', 'value')
-    )
-    def update_continent_dropdown(value):
-        continents = get_continents()
-        return [{'label': continent['continent'], 'value': continent['id']} for continent in continents]
     @dash_app.callback(
         Output('pandemic-dropdown', 'options'),
         Input('pandemic-dropdown', 'value')
@@ -331,21 +332,30 @@ def init_dashboard(server):
 
     @dash_app.callback(
         Output('continent-pie-chart', 'figure'),
-        [Input('country-dropdown', 'value')]
+        [Input('stat-type-dropdown', 'value')]
     )
-    def update_continent_pie_chart(country_id):
+    def update_continent_pie_chart(stat_type):
         continents = get_pandemic_by_continent()
 
         if not continents:
             return px.pie(title="Aucune donnée disponible")
+        if stat_type == 'daily_new_cases':
+            value_key = 'total_confirmed'
+            title = "Répartition des Cas Confirmés par Continent"
+        elif stat_type == 'daily_new_deaths':
+            value_key = 'total_deaths'
+            title = "Répartition des Décès par Continent"
+        else:
+            value_key = 'total_confirmed'
+            title = "Répartition par Continent"
 
         continent_names = [continent['continent'] for continent in continents]
-        continent_cases = [continent.get('cases', 0) for continent in continents]
+        values = [continent.get(value_key, 0) for continent in continents]
 
         fig = px.pie(
             names=continent_names,
-            values=continent_cases,
-            title="Répartition des Cas par Continent"
+            values=values,
+            title=title
         )
 
         fig.update_traces(textinfo='percent+label', pull=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
@@ -380,6 +390,51 @@ def init_dashboard(server):
             font=dict(color='white')
         )
         return fig 
+    
+    @dash_app.callback(
+        Output('continent-bar-chart', 'figure'),
+       [Input('stat-type-dropdown', 'value')]
+    )
+    def update_continent_bar_chart(stat_type):
+        data = get_pandemic_by_continent()
+
+        if not data:
+           return px.bar(title="Aucune donnée disponible")
+         
+
+        df = pd.DataFrame(data)
+        if stat_type == 'daily_new_cases':
+            y_column = 'total_confirmed'
+            title = "Total Confirmed Cases par Continent"
+        elif stat_type == 'daily_new_deaths':
+            y_column = 'total_deaths'
+            title = "Total Deaths par Continent"
+        else:
+            return px.bar(title="Statistique non reconnue")
+        
+        df[y_column] = pd.to_numeric(df[y_column], errors='coerce')
+
+    
+        df = df.sort_values(by=y_column, ascending=False)
+        df['continent'] = pd.Categorical(df['continent'], categories=df['continent'].tolist(), ordered=True)
+
+        fig = px.bar(df,
+                   x='continent',
+                   y=y_column,
+                   color='continent',
+                   title=title,
+                   labels={'continent': 'Continent', y_column:'Valeur'})
+
+        fig.update_layout(
+          plot_bgcolor='blue',
+          paper_bgcolor='blue',
+          font=dict(color='white'),
+          xaxis=dict(color='white'),
+          yaxis=dict(color='white')
+        )
+
+        return fig
+
 
     return dash_app
 

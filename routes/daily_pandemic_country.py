@@ -56,17 +56,16 @@ def get_daily_data_route(id_country, id_pandemic, date=None):
 
 
 
-# Ajouter des données journalières
-@bp.route('/', methods=['POST'])
-def add_daily_data_route():
+@bp.route('', methods=['POST'])
+def add_daily_pandemic_country():
     """
-    Ajouter des données journalières
+    Ajouter des données journalières pour un pays et une pandémie
     ---
     tags:
-      - Daily Pandemic Country
+      - Daily_pandemic_country
     parameters:
       - in: body
-        name: daily_data
+        name: data
         required: true
         schema:
           type: object
@@ -78,9 +77,11 @@ def add_daily_data_route():
             date:
               type: string
               format: date
+            daily_new_cases:
+              type: integer
             daily_new_deaths:
               type: integer
-            daily_new_cases:
+            active_cases:
               type: integer
     responses:
       201:
@@ -90,19 +91,21 @@ def add_daily_data_route():
     id_country = data.get('id_country')
     id_pandemic = data.get('id_pandemic')
     date = data.get('date')
-    daily_new_deaths = data.get('daily_new_deaths')
     daily_new_cases = data.get('daily_new_cases')
-    add_daily_data(id_country, id_pandemic, date, daily_new_deaths, daily_new_cases)
-    return jsonify({"message": "Daily data added successfully"}), 201
+    daily_new_deaths = data.get('daily_new_deaths')
+    active_cases = data.get('active_cases')
 
-# Mettre à jour des données journalières
+    add_daily_pandemic_country(id_country, id_pandemic, date, daily_new_cases, daily_new_deaths, active_cases)
+    return jsonify({"message": "Données journalières ajoutées avec succès"}), 201
+
+
 @bp.route('/<int:id_country>/<int:id_pandemic>/<string:date>', methods=['PUT'])
-def update_daily_data_route(id_country, id_pandemic, date):
+def update_daily_pandemic_country(id_country, id_pandemic, date):
     """
-    Mettre à jour des données journalières
+    Mettre à jour les données journalières pour un pays et une pandémie à une date donnée
     ---
     tags:
-      - Daily Pandemic Country
+      - Daily_pandemic_country
     parameters:
       - name: id_country
         in: path
@@ -118,24 +121,29 @@ def update_daily_data_route(id_country, id_pandemic, date):
         type: string
         format: date
       - in: body
-        name: daily_data
+        name: data
         required: true
         schema:
           type: object
           properties:
+            daily_new_cases:
+              type: integer
             daily_new_deaths:
               type: integer
-            daily_new_cases:
+            active_cases:
               type: integer
     responses:
       200:
-        description: Données journalières mises à jour
+        description: Données mises à jour avec succès
     """
     data = request.get_json()
-    daily_new_deaths = data.get('daily_new_deaths')
     daily_new_cases = data.get('daily_new_cases')
-    update_daily_data(id_country, id_pandemic, date, daily_new_deaths, daily_new_cases)
-    return jsonify({"message": "Daily data updated successfully"})
+    daily_new_deaths = data.get('daily_new_deaths')
+    active_cases = data.get('active_cases')
+
+    update_daily_data(id_country, id_pandemic, date, daily_new_cases, daily_new_deaths, active_cases)
+    return jsonify({"message": "Données journalières mises à jour avec succès"}), 200
+
 
 # Supprimer des données journalières
 @bp.route('/<int:id_country>/<int:id_pandemic>/<string:date>', methods=['DELETE'])
