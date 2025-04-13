@@ -381,7 +381,7 @@ def init_dashboard(server):
         if df.empty:
             return px.histogram()
         
-        fig = px.histogram(df, x='date', y=stat_type, title='Histogramme des {stat_type} quotidiens', nbins=30
+        fig = px.histogram(df, x='date', y=stat_type, title='Histogramme des cas quotidiens', nbins=30
         )
         fig.update_traces(marker=dict(color='red'))
         fig.update_layout(
