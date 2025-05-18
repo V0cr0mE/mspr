@@ -6,6 +6,7 @@ import base64
 import pandas as pd
 import plotly.express as px
 from flask import Flask
+from flask_cors import CORS 
 from flasgger import Swagger
 from werkzeug.utils import secure_filename
 from dash import dcc, html
@@ -20,14 +21,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
 UPLOAD_FOLDER = 'donnes'
-CLEAN_DATA_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
+CLEAN_DATA_FOLDER = '../donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__) 
+    CORS(app)
     Swagger(app, template={
         "swagger": "2.0",
         "info": {

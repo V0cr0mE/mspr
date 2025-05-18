@@ -1,5 +1,13 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import numpy as np
+from models.config_db import connect_to_db
+from load.continent import insert_continents
+from load.country import insert_countries
+from load.pandemic import insert_pandemics
+from load.pandemic_country import insert_pandemic_country_data
 
 def extract(file_path):
     try:
@@ -99,6 +107,14 @@ def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données sauvegardées dans : {output_file}")
+        conn=connect_to_db()
+        insert_continents(conn, output_file)
+        insert_countries(conn,output_file)
+        insert_pandemics(conn)
+        insert_pandemic_country_data(conn,output_file)
+        conn.close()
+        
+        
     except Exception as e:
         print(f"Erreur lors de la sauvegarde : {e}")
 
@@ -111,7 +127,7 @@ def process_summary(file_path, output_file):
 
 
 if __name__ == "__main__":
-    file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
+    file_path = "../donnes/worldometer_coronavirus_summary_data.csv"
+    output_file = "../donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
     process_summary(file_path, output_file)
     

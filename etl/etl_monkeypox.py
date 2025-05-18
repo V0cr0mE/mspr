@@ -1,4 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
+from models.config_db import connect_to_db
+from load.daily_pandemic_country import insert_daily_pandemic_country_data
+
 
 # --- Extraction ---
 def extract(file_path):
@@ -26,7 +32,7 @@ def transform(data):
         }, inplace=True)
 
         # Suppression des continents et agrégats globaux
-        countries_to_exclude = ["Africa", "Europe", "North America", "South America", "Asia", "World", "Puerto Rico"]
+        countries_to_exclude = ["Africa", "Europe", "North America", "South America", "Asia", "World", "Puerto Rico","Oceania"]
         data = data[~data['country'].isin(countries_to_exclude)]
 
         # Uniformisation des noms de pays
@@ -79,6 +85,10 @@ def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données enregistrées dans : {output_file}")
+        
+        conn=connect_to_db()
+        insert_daily_pandemic_country_data(conn,output_file,2)
+        conn.close()
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
         
@@ -90,7 +100,7 @@ def process_monkeypox(file_path, output_file):
             load(cleaned_data, output_file)
 
 if __name__ == "__main__":
-    input_file = "C:/Users/Anes/MSPR/donnes/owid-monkeypox-data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/owid-monkeypox-data_clean.csv"
+    input_file = "../donnes/owid-monkeypox-data.csv"
+    output_file = "../donnes_clean/owid-monkeypox-data_clean.csv"
     process_monkeypox(input_file, output_file)
 

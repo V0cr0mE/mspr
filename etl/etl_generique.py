@@ -1,9 +1,12 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import os
 from etl.etl_coronavirus_summary import process_summary
 from etl.etl_coronavirus_daily import process_daily
 from etl.etl_monkeypox import process_monkeypox
 
-CLEAN_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
+CLEAN_FOLDER = '../donnes_clean/'
 
 def detect_and_process(file_path):
     filename = os.path.basename(file_path)

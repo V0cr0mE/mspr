@@ -56,8 +56,8 @@ def main():
     conn = connect_to_database()
 
     # Chemin vers le fichier de donnes
-    covid_file ="C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv" 
-    MPOX_file ="C:/Users/Anes/MSPR/donnes_clean/owid-monkeypox-data_clean.csv" 
+    covid_file ="../donnes_clean/worldometer_coronavirus_daily_data_clean.csv" 
+    MPOX_file ="../donnes_clean/owid-monkeypox-data_clean.csv" 
 
     # Insertion des données dans la table daily_pandemic_country
     # Insérer les données uniquement pour Covid-19 (id_pandemic = 1)
