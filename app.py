@@ -20,6 +20,7 @@ from templates.dashboard import init_dashboard
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
+from routes.prediction import bp as prediction_bp
 UPLOAD_FOLDER = 'donnes'
 CLEAN_DATA_FOLDER = '../donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
@@ -49,6 +50,7 @@ def create_app():
     app.register_blueprint(country_bp)
     app.register_blueprint(pandemic_bp)
     app.register_blueprint(pandemic_country_bp)
+    app.register_blueprint(prediction_bp)
     app.register_blueprint(daily_pandemic_country_bp)
 
 

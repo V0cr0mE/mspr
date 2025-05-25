@@ -1,68 +1,65 @@
 import pandas as pd
+import sys
+import os
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from models.config_db import connect_to_db
 
-# --- Paramètres ---
-csv_path = "../donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
-country = "France"
 
-# --- Étape 1 : Charger et préparer les données ---
-print(f"Chargement des données pour {country}")
-data = pd.read_csv(csv_path)
-data['date'] = pd.to_datetime(data['date'])
+def predict_daily_cases_from_db(id_country: int, id_pandemic: int):
+    conn = connect_to_db()
+    query = """
+        SELECT date, daily_new_cases, active_cases
+        FROM daily_pandemic_country
+        WHERE id_country = %s AND id_pandemic = %s
+        ORDER BY date
+    """
+    df = pd.read_sql(query, conn, params=(id_country, id_pandemic))
+    conn.close()
 
-country_data = data[data['country'] == country].copy()
-country_data.sort_values('date', inplace=True)
-country_data.reset_index(drop=True, inplace=True)
+    if df.empty:
+        raise ValueError(f"Aucune donnée trouvée pour le pays ID {id_country} et la pandémie ID {id_pandemic}.")
 
-# --- Calcul du taux de transmission (formule OMS glissante) ---
-country_data['incidence_7d'] = country_data['daily_new_cases'].rolling(window=7).sum()
-country_data['prevalence_7d'] = country_data['active_cases'].rolling(window=7).mean()
-country_data['transmission_rate'] = (country_data['incidence_7d'] / country_data['prevalence_7d']) * 100
-country_data['transmission_rate'] = country_data['transmission_rate'].replace([np.inf, -np.inf], 0).fillna(0)
+    df['date'] = pd.to_datetime(df['date'])
 
-# --- Créer les features glissantes (lags)
-for i in range(1, 8):
-    country_data[f'lag_{i}'] = country_data['daily_new_cases'].shift(i)
+    df['incidence_7d'] = df['daily_new_cases'].rolling(window=7).sum()
+    df['prevalence_7d'] = df['active_cases'].rolling(window=7).mean()
+    df['transmission_rate'] = (df['incidence_7d'] / df['prevalence_7d']) * 100
+    df['transmission_rate'] = df['transmission_rate'].replace([np.inf, -np.inf], 0).fillna(0)
 
-country_data.dropna(inplace=True)
+    for i in range(1, 7 + 1):
+        df[f'lag_{i}'] = df['daily_new_cases'].shift(i)
 
-# --- Sélection des features
-X = country_data[[f'lag_{i}' for i in range(1, 8)] + ['transmission_rate']]
-y = country_data['daily_new_cases']
+    df.dropna(inplace=True)
 
-# --- Étape 2 : Entraîner le modèle ---
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
+    X = df[[f'lag_{i}' for i in range(1, 8)] + ['transmission_rate']]
+    y = df['daily_new_cases']
 
-# --- Étape 3 : Évaluer le modèle ---
-y_pred = model.predict(X_test)
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-mae = mean_absolute_error(y_test, y_pred)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
 
-print(f"Modèle entraîné pour {country}")
-print(f"RMSE : {rmse:.2f} | MAE : {mae:.2f}")
+    # prédiction future sur 7 jours
+    lags = df['daily_new_cases'].iloc[-7:].tolist()
+    transmission_rate = df['transmission_rate'].iloc[-1]
+    last_date = df['date'].iloc[-1]
 
-# --- Étape 4 : Prédiction pour les 7 prochains jours ---
-lags = country_data['daily_new_cases'].iloc[-7:].tolist()
-transmission_rate = country_data['transmission_rate'].iloc[-1]
-last_date = country_data['date'].iloc[-1]
+    predictions = []
+    for i in range(1, 8):
+        future_input = pd.DataFrame(
+            [lags + [transmission_rate]],
+            columns=[f'lag_{i}' for i in range(1, 8)] + ['transmission_rate']
+        )
+        y_next = model.predict(future_input)[0]
+        predictions.append({
+            "day": f"Jour +{i}",
+            "date": (last_date + pd.Timedelta(days=i)).strftime("%Y-%m-%d"),
+            "predicted_cases": int(y_next)
+        })
+        lags = lags[1:] + [y_next]
 
-print("\nPrédiction pour les 7 prochains jours :")
-for i in range(1, 8):
-    date_predite = last_date + pd.Timedelta(days=i)
-    X_pred = pd.DataFrame(
-        [lags + [transmission_rate]],
-        columns=[f'lag_{i}' for i in range(1, 8)] + ['transmission_rate']
-    )
-    y_next = model.predict(X_pred)[0]
-    print(f"{date_predite.date()} (Jour +{i}) : {int(y_next)} cas")
-    lags = lags[1:] + [y_next] 
+    return predictions
 
-# --- Infos supplémentaires ---
-print("\nDerniers cas journaliers observés :")
-print(country_data['daily_new_cases'].tail(7).to_list())
-print(f"Taux de transmission actuel : {transmission_rate:.2f}")
