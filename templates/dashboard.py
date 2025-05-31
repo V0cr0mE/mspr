@@ -17,7 +17,7 @@ from models.config_db import connect_to_db
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
-    UPLOAD_FOLDER = "C:/Users/Anes/MSPR/donnes"
+    UPLOAD_FOLDER = "../MSPR/donnes"
 
     dash_app.layout = html.Div([
         # Navigation
@@ -173,7 +173,7 @@ def init_dashboard(server):
       try:
           conn = connect_to_db()
 
-          base_path = "C:/Users/Anes/MSPR/donnes_clean/"
+          base_path = "../MSPR/donnes_clean/"
 
           insert_continents(conn, f"{base_path}worldometer_coronavirus_summary_data_clean.csv")
           insert_countries(conn, f"{base_path}worldometer_coronavirus_summary_data_clean.csv")

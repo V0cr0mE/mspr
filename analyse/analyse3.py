@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Chargement du fichier
-df = pd.read_csv("C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_daily_data.csv")
+df = pd.read_csv("../MSPR/donnes/worldometer_coronavirus_daily_data.csv")
 
 # --- Analyse des valeurs manquantes ---
 missing_values = df.isnull().sum()

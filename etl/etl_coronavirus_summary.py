@@ -111,7 +111,7 @@ def process_summary(file_path, output_file):
 
 
 if __name__ == "__main__":
-    file_path = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
+    file_path = "../MSPR/donnes/worldometer_coronavirus_summary_data.csv"
+    output_file = "../MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
     process_summary(file_path, output_file)
     

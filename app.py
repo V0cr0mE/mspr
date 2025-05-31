@@ -16,11 +16,12 @@ from routes.pandemic import bp as pandemic_bp
 from routes.pandemic_country import bp as pandemic_country_bp
 from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
 from templates.dashboard import init_dashboard
+from flask_cors import CORS
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
 UPLOAD_FOLDER = 'donnes'
-CLEAN_DATA_FOLDER = 'C:/Users/Anes/MSPR/donnes_clean/'
+CLEAN_DATA_FOLDER = '../MSPR/donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
 def allowed_file(filename):
@@ -28,6 +29,7 @@ def allowed_file(filename):
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     Swagger(app, template={
         "swagger": "2.0",
         "info": {

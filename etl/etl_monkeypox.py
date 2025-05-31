@@ -90,7 +90,7 @@ def process_monkeypox(file_path, output_file):
             load(cleaned_data, output_file)
 
 if __name__ == "__main__":
-    input_file = "C:/Users/Anes/MSPR/donnes/owid-monkeypox-data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/owid-monkeypox-data_clean.csv"
+    input_file = "../MSPR/donnes/owid-monkeypox-data.csv"
+    output_file = "../MSPR/donnes_clean/owid-monkeypox-data_clean.csv"
     process_monkeypox(input_file, output_file)
 

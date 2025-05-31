@@ -112,6 +112,6 @@ def process_daily(file_path, output_file):
 
 # Main
 if __name__ == "__main__":
-    input_file = "C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_daily_data.csv"
-    output_file = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
+    input_file = "../MSPR/donnes/worldometer_coronavirus_daily_data.csv"
+    output_file = "../MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
     process_daily(input_file, output_file)
