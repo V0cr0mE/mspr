@@ -13,6 +13,7 @@ def create_daily_pandemic_country_table(conn):
                     "id_country" INT,
                     "id_pandemic" INT,  
                     "date" DATE,
+                    "active_cases" BIGINT,
                     "daily_new_deaths" BIGINT,
                     "daily_new_cases" BIGINT,
                     PRIMARY KEY ("id_country","id_pandemic","date"), 

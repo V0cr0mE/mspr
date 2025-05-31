@@ -13,11 +13,8 @@ def get_all_pandemic_country():
             "total_deaths": row[3],
             "total_recovered": row[4],
             "active_cases": row[5],
-            "serious_or_critical": row[6],
-            "total_tests": row[7],
-            "total_tests_per_1m_population": row[8],
-            "total_deaths_per_1m_population": row[9],
-            "total_cases_per_1m_population": row[10]
+            "total_tests": row[6]
+
         } for row in rows]
     conn.close()
     return pandemic_countries
@@ -39,11 +36,8 @@ def get_pandemic_country_by_id(id_country, id_pandemic):
                 "total_deaths": row[3],
                 "total_recovered": row[4],
                 "active_cases": row[5],
-                "serious_or_critical": row[6],
-                "total_tests": row[7],
-                "total_tests_per_1m_population": row[8],
-                "total_deaths_per_1m_population": row[9],
-                "total_cases_per_1m_population": row[10]
+                "total_tests": row[6]
+
             }
             return pandemic_country
         return None
@@ -51,41 +45,45 @@ def get_cases_by_continent():
     conn = connect_to_db()
     with conn.cursor() as cursor:
         cursor.execute("""
-            SELECT c.continent, SUM(p."total_confirmed") AS cases
+            SELECT 
+                c.continent, 
+                SUM(p."total_confirmed") AS total_confirmed,
+                SUM(p."total_deaths") AS total_deaths,
+                SUM(p."total_recovered") AS total_recovered
             FROM pandemic_country p
             JOIN Country co ON p."id_country" = co."id_country"
             JOIN Continent c ON co."Id_continent" = c."Id_continent"
             WHERE p."id_pandemic" = 1
             GROUP BY c.continent
-            ORDER BY cases DESC   
+            ORDER BY total_confirmed DESC   
         """)
         rows = cursor.fetchall()
-        continent_cases = [{"continent": row[0], "cases": row[1]} for row in rows]
+        continent_cases = [{
+            "continent": row[0],
+            "total_confirmed": row[1],
+            "total_deaths": row[2],
+            "total_recovered": row[3]
+        } for row in rows]
     return continent_cases
+
 
 
 # Ajouter une entrée pour un pays et une pandémie
 def add_pandemic_country(id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
-                         active_cases, serious_or_critical, total_tests, 
-                         total_tests_per_1m_population, total_deaths_per_1m_population,
-                         total_cases_per_1m_population):
+                         active_cases,total_tests):
     conn = connect_to_db()
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO pandemic_country (
                     "id_country", "id_pandemic", "total_confirmed", "total_deaths", "total_recovered", 
-                    "active_cases", "serious_or_critical", "total_tests", 
-                    "total_tests_per_1m_population", "total_deaths_per_1m_population", 
-                    "total_cases_per_1m_population"
+                    "active_cases", "total_tests"
                 ) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT ("id_country", "id_pandemic") DO NOTHING
                 
             """, (id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
-                  active_cases, serious_or_critical, total_tests,
-                  total_tests_per_1m_population, total_deaths_per_1m_population,
-                  total_cases_per_1m_population))
+                  active_cases,total_tests))
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -110,9 +108,7 @@ def delete_pandemic_country(id_country, id_pandemic):
 
 # Mettre à jour les données d'une pandémie pour un pays
 def update_pandemic_country(id_country, id_pandemic, total_confirmed, total_deaths, total_recovered,
-                            active_cases, serious_or_critical, total_tests, 
-                            total_tests_per_1m_population, total_deaths_per_1m_population,
-                            total_cases_per_1m_population):
+                            active_cases,total_tests):
     conn = connect_to_db()
     try:
         with conn.cursor() as cursor:
@@ -122,16 +118,11 @@ def update_pandemic_country(id_country, id_pandemic, total_confirmed, total_deat
                     "total_confirmed" = %s, 
                     "total_deaths" = %s, 
                     "total_recovered" = %s, 
-                    "active_cases" = %s, 
-                    "serious_or_critical" = %s, 
-                    "total_tests" = %s, 
-                    "total_tests_per_1m_population" = %s, 
-                    "total_deaths_per_1m_population" = %s, 
-                    "total_cases_per_1m_population" = %s
+                    "active_cases" = %s,  
+                    "total_tests" = %s
                 WHERE "id_country" = %s AND "id_pandemic" = %s
-            """, (total_confirmed, total_deaths, total_recovered, active_cases, serious_or_critical,
-                  total_tests, total_tests_per_1m_population, total_deaths_per_1m_population,
-                  total_cases_per_1m_population, id_country, id_pandemic))
+            """, (total_confirmed, total_deaths, total_recovered, active_cases,
+                  total_tests,id_country, id_pandemic))
         conn.commit()
     except Exception as e:
         conn.rollback()

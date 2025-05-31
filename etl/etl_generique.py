@@ -1,6 +1,12 @@
-import pandas as pd
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import os
+from etl.etl_coronavirus_summary import process_summary
+from etl.etl_coronavirus_daily import process_daily
+from etl.etl_monkeypox import process_monkeypox
 
+<<<<<<< HEAD
 
 # Extraction
 def extract(file_path):
@@ -121,9 +127,36 @@ def load(data, output_file):
         print(f"Données nettoyées enregistrées dans : {output_file}")
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
+=======
+CLEAN_FOLDER = '../donnes_clean/'
+
+def detect_and_process(file_path):
+    filename = os.path.basename(file_path)
+    print("Nom du fichier détecté :", filename)
+
+    output_path = os.path.join(CLEAN_FOLDER, f"{filename.replace('.csv', '_clean.csv')}")
+
+    if "worldometer_coronavirus_summary" in filename:
+        print("Fichier détecté : Données cumulées (summary)")
+        process_summary(file_path,output_path)
+
+        
+
+    elif "worldometer_coronavirus_daily" in filename:
+        print("Fichier détecté : Données journalières (daily)")
+        process_daily(file_path,output_path)
+
+    elif "monkeypox" in filename:
+        print("Fichier détecté : Monkeypox")
+        process_monkeypox(file_path,output_path)
+
+    else:
+        print("Type de fichier inconnu : aucun traitement associé.")
+>>>>>>> 84497e9cce70d33ec028c2e0e041b077d81c8ff2
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     files = [
         ("../donnes/worldometer_coronavirus_daily_data.csv", "worldometer_daily"),
         ("../donnes/worldometer_coronavirus_summary_data.csv", "worldometer_summary"),
@@ -141,3 +174,7 @@ if __name__ == "__main__":
                     os.path.basename(file_path).replace(".csv", "_clean.csv"),
                 )
                 load(cleaned_data, output_file)
+=======
+    file_path = input("Entrez le chemin du fichier à traiter : ")
+    detect_and_process(file_path)
+>>>>>>> 84497e9cce70d33ec028c2e0e041b077d81c8ff2

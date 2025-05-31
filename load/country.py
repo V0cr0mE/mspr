@@ -14,7 +14,7 @@ def insert_countries(conn, file_path):
         with conn.cursor() as cursor:
             # Lire le fichier CSV
             with open(file_path, mode='r', encoding='utf-8') as file:
-                csv_reader = csv.DictReader(file)  # Utilisation de DictReader pour lire les colonnes par nom
+                csv_reader = csv.DictReader(file)  
                 
                 for row in csv_reader:
                     country = row['country']

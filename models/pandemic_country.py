@@ -16,11 +16,7 @@ def create_pandemic_country_table(conn):
                     "total_deaths" BIGINT,
                     "total_recovered" BIGINT,     
                     "active_cases" BIGINT,
-                    "serious_or_critical" BIGINT,
                     "total_tests" BIGINT,
-                    "total_tests_per_1m_population" BIGINT,
-                    "total_deaths_per_1m_population" BIGINT,
-                    "total_cases_per_1m_population" BIGINT,
                     PRIMARY KEY ("id_country","id_pandemic"), 
                     FOREIGN KEY ("id_country") REFERENCES country("id_country") ON DELETE CASCADE,
                     FOREIGN KEY ("id_pandemic") REFERENCES pandemic("id_pandemic") ON DELETE CASCADE
