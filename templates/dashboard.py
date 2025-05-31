@@ -16,8 +16,8 @@ from load.pandemic_country import insert_pandemic_country_data
 from models.config_db import connect_to_db
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
-    UPLOAD_FOLDER = "C:/Users/Anes/MSPR/donnes"
+    dash_app = dash.Dash(__name__, server=server, url_base_pathname='/')
+    UPLOAD_FOLDER = "../MSPR/donnes"
 
     dash_app.layout = html.Div([
         # Navigation

@@ -116,21 +116,8 @@ def load(data, output_file):
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
 
-<<<<<<< HEAD
-if __name__ == "__main__":
-    input_file = "../donnes/worldometer_coronavirus_daily_data.csv"
-    output_file = "../donnes_clean/worldometer_coronavirus_daily_clean.csv"
-
-    # Processus ETL
-
-    # Extraction
-    raw_data = extract(input_file)
-
-    # Transformation
-=======
 def process_daily(file_path, output_file):
     raw_data = extract(file_path)
->>>>>>> 84497e9cce70d33ec028c2e0e041b077d81c8ff2
     if raw_data is not None:
         cleaned_data = transform(raw_data)
         if cleaned_data is not None:

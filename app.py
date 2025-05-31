@@ -20,13 +20,8 @@ from templates.dashboard import init_dashboard
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
-<<<<<<< HEAD
-# Configuration pour l'upload de fichiers
-UPLOAD_FOLDER = 'donnes'  
-=======
 from routes.prediction import bp as prediction_bp
 UPLOAD_FOLDER = 'donnes'
->>>>>>> 84497e9cce70d33ec028c2e0e041b077d81c8ff2
 CLEAN_DATA_FOLDER = '../donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
