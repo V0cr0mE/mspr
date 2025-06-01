@@ -1,124 +1,126 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import Filters from './components/Filters';
+import StatsCards from './components/StatsCards';
+import LineChart from './components/LineChart';
+import PieChart from './components/PieChart';
+import Histogram from './components/Histogram';
+import BarChart from './components/BarChart';
 
 export default function Dashboard() {
-  const [countries, setCountries] = useState([]);
-  const [pandemics, setPandemics] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedPandemic, setSelectedPandemic] = useState(null);
-  const [statType, setStatType] = useState('daily_new_cases');
-  const [stats, setStats] = useState({});
-  const [startDate, setStartDate] = useState("2020-01-01");
-  const [endDate, setEndDate] = useState("2025-01-01");
-  const [transmissionRate, setTransmissionRate] = useState(0);
-  const [mortalityRate, setMortalityRate] = useState(0);
+    // États principaux
+    const [countries, setCountries] = useState([]);
+    const [pandemics, setPandemics] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState("");
+    const [selectedPandemic, setSelectedPandemic] = useState("");
+    const [statType, setStatType] = useState('daily_new_cases');
+    const [startDate, setStartDate] = useState("2020-01-01");
+    const [endDate, setEndDate] = useState("2025-01-01");
 
-  useEffect(() => {
-    axios.get('http://127.0.0.1:5000/country').then(res => setCountries(res.data));
-    axios.get('http://127.0.0.1:5000/pandemic').then(res => setPandemics(res.data));
-  }, []);
+    // Données chiffrées
+    const [stats, setStats] = useState({
+        total_confirmed: 0,
+        total_deaths: 0,
+        total_recovered: 0,
+        population: 0
+    });
+    const [mortalityRate, setMortalityRate] = useState(0);
+    const [transmissionRate, setTransmissionRate] = useState(0);
 
-  useEffect(() => {
-    if (selectedCountry && selectedPandemic) {
-      axios
-        .get(`http://127.0.0.1:5000/pandemic_country/${selectedCountry}/${selectedPandemic}`)
-        .then(res => {
-          setStats(res.data);
-          const { total_deaths, total_confirmed } = res.data;
-          const rate = total_confirmed ? (total_deaths / total_confirmed) * 100 : 0;
-          setMortalityRate(rate.toFixed(2));
-        });
+    // Données journalières
+    const [dailyData, setDailyData] = useState([]);
 
-      axios
-        .get(`http://127.0.0.1:5000/daily_pandemic_country/${selectedCountry}/${selectedPandemic}`)
-        .then(res => {
-          const data = res.data.filter(entry => {
-            const date = new Date(entry.date);
-            return date >= new Date(startDate) && date <= new Date(endDate);
-          });
+    // Agrégation par continent
+    const [byContinent, setByContinent] = useState([]);
 
-          const totalCases = data.reduce((sum, item) => sum + (item.daily_new_cases || 0), 0);
-          const meanActive = data.reduce((sum, item) => sum + (item.active_cases || 0), 0) / (data.length || 1);
+    // Charger la liste des pays et pandémies au montage
+    useEffect(() => {
+        axios.get('http://127.0.0.1:5000/country')
+            .then(res => setCountries(res.data))
+            .catch(err => console.error("Erreur country:", err));
 
-          const transmission = meanActive ? (totalCases / meanActive) * 100 : 0;
-          setTransmissionRate(transmission.toFixed(2));
-        });
-    }
-  }, [selectedCountry, selectedPandemic, startDate, endDate]);
+        axios.get('http://127.0.0.1:5000/pandemic')
+            .then(res => setPandemics(res.data))
+            .catch(err => console.error("Erreur pandemic:", err));
+    }, []);
 
-  return (
-    <div className="p-4 text-black">
-      <h1 className="text-3xl font-bold mb-4 text-center">Pandemic Dashboard</h1>
+    // Récupérer stats et données journalières lors du changement de sélection et de période
+    useEffect(() => {
+        if (!selectedCountry || !selectedPandemic) {
+            setStats({ total_confirmed: 0, total_deaths: 0, total_recovered: 0, population: 0 });
+            setDailyData([]);
+            setMortalityRate(0);
+            setTransmissionRate(0);
+            return;
+        }
 
-      <div className="flex flex-wrap gap-4 justify-center mb-6">
-        <select
-          className="w-40 h-30 p-2 rounded bg-gray-800 text-white text-center appearance-none"
-          onChange={e => setSelectedCountry(e.target.value)}
-          defaultValue=""
-        >
-          <option value="" disabled>Select Country</option>
-          {countries.map(([id, name]) => (
-            <option key={id} value={id}>{name}</option>
-          ))}
-        </select>
+        axios.get(`http://127.0.0.1:5000/pandemic_country/${selectedCountry}/${selectedPandemic}`)
+            .then(res => {
+                const d = res.data;
+                setStats({
+                    total_confirmed: d.total_confirmed || 0,
+                    total_deaths: d.total_deaths || 0,
+                    total_recovered: d.total_recovered || 0,
+                    population: d.population || 0
+                });
+                const rateMort = d.total_confirmed ? (d.total_deaths / d.total_confirmed) * 100 : 0;
+                setMortalityRate(rateMort.toFixed(2));
+            })
+            .catch(err => console.error("Erreur totaux:", err));
 
-        <select
-          className=" w-40 h-30 p-2 rounded bg-gray-800 text-white text-center appearance-none"
-          onChange={e => setSelectedPandemic(e.target.value)}
-          defaultValue=""
-        >
-          <option value="" disabled>Select Pandemic</option>
-          {pandemics.map(p => (
-            <option key={p.id_pandemic} value={p.id_pandemic}>{p.name}</option>
-          ))}
-        </select>
+        axios.get(`http://127.0.0.1:5000/daily_pandemic_country/${selectedCountry}/${selectedPandemic}`)
+            .then(res => {
+                const filt = res.data.filter(entry => {
+                    const d = new Date(entry.date);
+                    return d >= new Date(startDate) && d <= new Date(endDate);
+                });
+                setDailyData(filt);
+                const totalCases = filt.reduce((sum, x) => sum + (x.daily_new_cases || 0), 0);
+                const meanActive = filt.length
+                    ? filt.reduce((sum, x) => sum + (x.active_cases || 0), 0) / filt.length
+                    : 0;
+                const trans = meanActive ? (totalCases / meanActive) * 100 : 0;
+                setTransmissionRate(trans.toFixed(2));
+            })
+            .catch(err => console.error("Erreur dailyData:", err));
+    }, [selectedCountry, selectedPandemic, startDate, endDate]);
 
-        <select
-          className="w-40 h-30 p-2 rounded bg-gray-800 text-white text-center appearance-none"
-          onChange={e => setStatType(e.target.value)}
-          value={statType}
-        >
-          <option value="daily_new_cases">Cases</option>
-          <option value="daily_new_deaths">Deaths</option>
-        </select>
+    // Récupérer l'agrégation par continent
+    useEffect(() => {
+        axios.get(`http://127.0.0.1:5000/pandemic_country/continent`)
+            .then(res => setByContinent(res.data))
+            .catch(err => console.error("Erreur byContinent:", err));
+    }, [statType]);
 
-        <input
-          type="date"
-          value={startDate}
-          onChange={e => setStartDate(e.target.value)}
-          className="w-40 h-30 p-2 rounded bg-gray-800 text-white text-center appearance-none"
-        />
-        <input
-          type="date"
-          value={endDate}
-          onChange={e => setEndDate(e.target.value)}
-          className="w-40 h-30 p-2 rounded bg-gray-800 text-white text-center appearance-none"
-        />
-      </div>
+    return (
+        <div className="min-h-screen bg-gray-900 text-white p-4">
+            <header className="mb-6">
+                <h1 className="text-3xl font-bold text-center">Tableau de bord Pandémies</h1>
+            </header>
 
-      {/* Stat Cards */}
-      <div className="flex flex-wrap justify-center gap-4">
-        <div className="w-40 h-28 p-4 bg-primary text-primary-foreground rounded shadow">
-          <h3 className="text-lg font-semibold">Total Confirmed</h3>
-          <p className="text-2xl font-bold">{stats.total_confirmed || 0}</p>
+            <Filters
+                countries={countries}
+                pandemics={pandemics}
+                selectedCountry={selectedCountry}
+                setSelectedCountry={setSelectedCountry}
+                selectedPandemic={selectedPandemic}
+                setSelectedPandemic={setSelectedPandemic}
+                statType={statType}
+                setStatType={setStatType}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                endDate={endDate}
+                setEndDate={setEndDate}
+            />
+
+            <StatsCards stats={stats} mortalityRate={mortalityRate} transmissionRate={transmissionRate} />
+
+            <section aria-label="Visualisations interactives" className="space-y-8">
+                <LineChart dailyData={dailyData} statType={statType} />
+                <PieChart byContinent={byContinent} statType={statType} />
+                <Histogram dailyData={dailyData} statType={statType} />
+                <BarChart byContinent={byContinent} statType={statType} />
+            </section>
         </div>
-        <div className="w-40 h-28 p-4 bg-destructive text-destructive-foreground rounded shadow">
-          <h3 className="text-lg font-semibold">Total Deaths</h3>
-          <p className="text-2xl font-bold">{stats.total_deaths || 0}</p>
-        </div>
-        <div className="w-40 h-28 p-4 bg-accent text-accent-foreground rounded shadow">
-          <h3 className="text-lg font-semibold">Total Recovered</h3>
-          <p className="text-2xl font-bold">{stats.total_recovered || 0}</p>
-        </div>
-        <div className="w-40 h-28 p-4 bg-muted text-muted-foreground rounded shadow">
-          <h3 className="text-lg font-semibold">Mortality Rate</h3>
-          <p className="text-2xl font-bold">{mortalityRate}%</p>
-        </div>
-        <div className="w-40 h-28 p-4 bg-muted text-muted-foreground rounded shadow">
-          <h3 className="text-lg font-semibold">Transmission Rate</h3>
-          <p className="text-2xl font-bold">{transmissionRate}%</p>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

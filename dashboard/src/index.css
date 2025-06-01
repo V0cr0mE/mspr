@@ -104,3 +104,10 @@ button:focus-visible {
   --chart-4: 120 100% 40%;
   --chart-5: 280 60% 60%;
 }
+
+#react-entry-point, html, body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background-color: #121212; /* ou la couleur souhaitée */
+}
