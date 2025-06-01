@@ -9,7 +9,6 @@ def get_daily_data(id_country, id_pandemic, date=None):
     """
     params = [id_country, id_pandemic]
     
-    # Filtrer par date si elle est fournie
     if date:
         query += " AND \"date\" = %s"
         params.append(date)
@@ -22,9 +21,8 @@ def get_daily_data(id_country, id_pandemic, date=None):
                 "id_country": row[0],
                 "id_pandemic": row[1],
                 "date": row[2].strftime('%Y-%m-%d'),
-                "active_cases":row[3],
-                "daily_new_deaths": row[4],
-                "daily_new_cases": row[5]
+                "daily_new_deaths": row[3],
+                "daily_new_cases": row[4]
             }
             for row in rows
         ]
