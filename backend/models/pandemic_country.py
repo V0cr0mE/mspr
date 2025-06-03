@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from config_db import connect_to_db
 
 # Fonction pour établir une connexion à la base de données

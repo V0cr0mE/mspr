@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import psycopg2
 # Paramètres de connexion à la base de données
 host = "localhost"
@@ -6,7 +7,6 @@ user = "postgres"
 password = "Chichibald76."
 port = "5433"
 
-print("Connexion réussie à la base de données.")
 
 # Fonction de connexion à la base de données
 def connect_to_db():

@@ -16,8 +16,8 @@ def execute_python_files(directory, exclude_files=None):
             subprocess.run([sys.executable, filepath], check=True)
 
 if __name__ == "__main__":
-    models_directory = os.path.join(os.getcwd(), "models")
-    loads_directory = os.path.join(os.getcwd(), "loads")
+    models_directory = os.path.join(os.getcwd(),"backend", "models")
+    loads_directory = os.path.join(os.getcwd(), "backend", "loads")
     
     if os.path.exists(models_directory):
         execute_python_files(models_directory, exclude_files=["config_db.py", "__init__.py"])
