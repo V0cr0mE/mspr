@@ -15,7 +15,7 @@ export default function Filters({
     setEndDate
 }) {
     return (
-        <aside className="w-64 p-4">
+        <aside className="w-full md:w-64 p-4 mb-6 md:mb-0">
             <section aria-label="Filtres" className="flex flex-col items-start gap-4 mb-8">
                 {/* Sélection Pays */}
                 <div className="w-full">

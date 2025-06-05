@@ -104,8 +104,8 @@ export default function Dashboard() {
                 <h1 className="text-3xl font-bold text-center">Tableau de bord Pandémies</h1>
             </header>
 
-            {/* Conteneur principal en deux colonnes */}
-            <div className="flex items-start">
+            {/* Conteneur principal responsive : column sur mobile, row à partir de md */}
+            <div className="flex flex-col md:flex-row items-start">
                 {/* Colonne de gauche : Filters (largeur fixée dans Filters.jsx) */}
                 <Filters
                     countries={countries}
@@ -122,8 +122,8 @@ export default function Dashboard() {
                     setEndDate={setEndDate}
                 />
 
-                {/* Colonne de droite : StatsCards + Visualisations */}
-                <div className="flex-1 space-y-8 ml-6">
+                {/* Contenu principal : full width mobile, margin-left sur md+ */}
+                <div className="flex-1 space-y-8 mt-6 md:mt-0 md:ml-6">
                     <StatsCards
                         stats={stats}
                         mortalityRate={mortalityRate}
@@ -131,15 +131,13 @@ export default function Dashboard() {
                     />
 
                     <section aria-label="Visualisations interactives" className="space-y-8">
-                        <div className="flex gap-6">
-                            {/* Colonne de gauche : LineChart + Histogram */}
-                            <div className="flex-1 space-y-8">
+                        {/* passe à 2 colonnes sur lg+ */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="space-y-8">
                                 <LineChart dailyData={dailyData} statType={statType} />
                                 <Histogram dailyData={dailyData} statType={statType} />
                             </div>
-
-                            {/* Colonne de droite : PieChart + BarChart */}
-                            <div className="flex-1 space-y-8">
+                            <div className="space-y-8">
                                 <PieChart byContinent={byContinent} statType={statType} />
                                 <BarChart byContinent={byContinent} statType={statType} />
                             </div>

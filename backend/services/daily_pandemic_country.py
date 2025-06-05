@@ -21,8 +21,9 @@ def get_daily_data(id_country, id_pandemic, date=None):
                 "id_country": row[0],
                 "id_pandemic": row[1],
                 "date": row[2].strftime('%Y-%m-%d'),
-                "daily_new_deaths": row[3],
-                "daily_new_cases": row[4]
+                "active_cases": row[3],
+                "daily_new_deaths": row[4],
+                "daily_new_cases": row[5]
             }
             for row in rows
         ]

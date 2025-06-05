@@ -11,7 +11,6 @@ port = "5433"
 # Fonction de connexion à la base de données
 def connect_to_db():
     try:
-        print("Try Connexion réussie à la base de données.")
         conn = psycopg2.connect(
             host=host,
             dbname=dbname,
