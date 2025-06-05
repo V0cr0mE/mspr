@@ -9,6 +9,39 @@ def get_all_countries():
     conn.close()
     return countries
 
+def get_all_countries_by_continent(id_continent):
+    conn = connect_to_db()
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT id_country, country, population, "Id_continent"
+            FROM country
+            WHERE "Id_continent" = %s;
+        """, (id_continent,))
+        countries = cursor.fetchall()
+    conn.close()
+    return countries
+
+def get_country_by_id(id_country):
+    conn = connect_to_db()
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT id_country, country, population, "Id_continent"
+            FROM country
+            WHERE id_country = %s;
+        """, (id_country,))
+        row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "id_country": row[0],
+            "country": row[1],
+            "population": row[2],
+            "id_continent": row[3]
+        }
+    else:
+        return None
+
+
 # Ajouter un pays
 def add_country(country_name, population, id_continent):
     conn = connect_to_db()
@@ -28,6 +61,7 @@ def delete_country(id_country):
         cursor.execute("DELETE FROM country WHERE \"id_country\" = %s;", (id_country,))
     conn.commit()
     conn.close()
+        
 
 # Mettre à jour un pays
 def update_country(id_country, country_name, population, id_continent):

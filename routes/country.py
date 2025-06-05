@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
-from services.country import get_all_countries, add_country, delete_country, update_country
+from services.country import get_all_countries, add_country, delete_country, update_country,get_country_by_id,get_all_countries_by_continent
+
 
 bp = Blueprint('country', __name__, url_prefix='/country')
 
@@ -30,6 +31,62 @@ def get_countries():
     """
     countries = get_all_countries()
     return jsonify(countries)
+  
+@bp.route('/continent/<int:id_continent>', methods=['GET'])
+def get_countries_by_continent(id_continent):
+    """
+    Récupérer les pays par continent
+    ---
+    parameters:
+      - name: id_continent
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Liste des pays du continent
+    """
+    try:
+        countries = get_all_countries_by_continent(id_continent)
+        return jsonify(countries)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+  
+@bp.route('/<int:id>', methods=['GET'])
+def get_country(id):
+    """
+    Récupérer les détails d'un pays par ID
+    ---
+    tags:
+      - Country
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: ID du pays
+    responses:
+      200:
+        description: Détails du pays
+        schema:
+          type: object
+          properties:
+            id_country:
+              type: integer
+            country:
+              type: string
+            population:
+              type: integer
+            id_continent:
+              type: integer
+      404:
+        description: Pays non trouvé
+    """
+    country = get_country_by_id(id)
+    if country:
+        return jsonify(country)
+    else:
+        return jsonify({"error": "Pays non trouvé"}), 404
 
 # Route pour ajouter un pays
 @bp.route('', methods=['POST'])
