@@ -17,14 +17,11 @@ def execute_python_files(directory, exclude_files=None):
 
 if __name__ == "__main__":
     models_directory = os.path.join(os.getcwd(), "models")
-    loads_directory = os.path.join(os.getcwd(), "loads")
+    
     
     if os.path.exists(models_directory):
         execute_python_files(models_directory, exclude_files=["config_db.py", "__init__.py"])
     else:
         print(f"Le répertoire {models_directory} n'existe pas.")
     
-    if os.path.exists(loads_directory):
-        execute_python_files(loads_directory, exclude_files=["__init__.py"])
-    else:
-        print(f"Le répertoire {loads_directory} n'existe pas.")
+

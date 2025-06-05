@@ -14,7 +14,7 @@ def insert_countries(conn, file_path):
         with conn.cursor() as cursor:
             # Lire le fichier CSV
             with open(file_path, mode='r', encoding='utf-8') as file:
-                csv_reader = csv.DictReader(file)  # Utilisation de DictReader pour lire les colonnes par nom
+                csv_reader = csv.DictReader(file)  
                 
                 for row in csv_reader:
                     country = row['country']
@@ -51,7 +51,7 @@ def main():
     conn = connect_to_database()
 
     # Chemin vers le fichier de donnes
-    file_path = "../MSPR/donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
+    file_path = "../donnes_clean/worldometer_coronavirus_summary_data_clean.csv"
 
     # Insertion des pays
     insert_countries(conn, file_path)

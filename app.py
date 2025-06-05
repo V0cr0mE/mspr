@@ -6,6 +6,7 @@ import base64
 import pandas as pd
 import plotly.express as px
 from flask import Flask
+from flask_cors import CORS 
 from flasgger import Swagger
 from werkzeug.utils import secure_filename
 from dash import dcc, html
@@ -20,6 +21,7 @@ from flask_cors import CORS
 sys.path.append(os.path.join(os.path.dirname(__file__), 'load'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'etl'))
 
+from routes.prediction import bp as prediction_bp
 UPLOAD_FOLDER = 'donnes'
 CLEAN_DATA_FOLDER = '../MSPR/donnes_clean/'
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
@@ -49,6 +51,7 @@ def create_app():
     app.register_blueprint(country_bp)
     app.register_blueprint(pandemic_bp)
     app.register_blueprint(pandemic_country_bp)
+    app.register_blueprint(prediction_bp)
     app.register_blueprint(daily_pandemic_country_bp)
 
 

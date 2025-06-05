@@ -1,4 +1,12 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
+import pandas as pd
+import numpy as np
+from models.config_db import connect_to_db
+from load.daily_pandemic_country import insert_daily_pandemic_country_data
+
 
 # Extraction
 def extract(file_path):
@@ -100,6 +108,11 @@ def load(data, output_file):
     try:
         data.to_csv(output_file, index=False)
         print(f"Données enregistrées dans : {output_file}")
+        
+        conn=connect_to_db()
+        insert_daily_pandemic_country_data(conn,output_file,1)
+        conn.close()
+        
     except Exception as e:
         print(f"Erreur lors de l'enregistrement : {e}")
 
@@ -112,6 +125,6 @@ def process_daily(file_path, output_file):
 
 # Main
 if __name__ == "__main__":
-    input_file = "../MSPR/donnes/worldometer_coronavirus_daily_data.csv"
-    output_file = "../MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
+    input_file = "../donnes/worldometer_coronavirus_daily_data.csv"
+    output_file = "../donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
     process_daily(input_file, output_file)
