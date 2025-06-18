@@ -6,6 +6,7 @@ import LineChart from './components/LineChart';
 import PieChart from './components/PieChart';
 import Histogram from './components/Histogram';
 import BarChart from './components/BarChart';
+import Map from './components/Map';
 
 export default function Dashboard() {
     // États principaux
@@ -140,6 +141,7 @@ export default function Dashboard() {
                             <div className="space-y-8">
                                 <PieChart byContinent={byContinent} statType={statType} />
                                 <BarChart byContinent={byContinent} statType={statType} />
+                                <Map pandemicId={selectedPandemic} statType={statType} />
                             </div>
                         </div>
                     </section>

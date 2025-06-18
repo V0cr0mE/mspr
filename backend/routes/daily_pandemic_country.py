@@ -3,7 +3,8 @@ from services.daily_pandemic_country import (
     get_daily_data,
     add_daily_data,
     update_daily_data,
-    delete_daily_data
+    delete_daily_data,
+    get_latest_data_all_countries
 )
 
 bp = Blueprint('daily_pandemic_country', __name__, url_prefix='/daily_pandemic_country')
@@ -173,3 +174,9 @@ def delete_daily_data_route(id_country, id_pandemic, date):
     """
     delete_daily_data(id_country, id_pandemic, date)
     return jsonify({"message": "Daily data deleted successfully"})
+
+@bp.route('/latest/<int:id_pandemic>', methods=['GET'])
+def latest_data_all_countries(id_pandemic):
+    """Récupérer la dernière donnée journalière pour tous les pays d'une pandémie"""
+    data = get_latest_data_all_countries(id_pandemic)
+    return jsonify(data)
