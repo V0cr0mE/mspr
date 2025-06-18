@@ -31,6 +31,7 @@ def detect_and_process(file_path):
     else:
         print("Type de fichier inconnu : aucun traitement associé.")
 
+
 if __name__ == "__main__":
     file_path = input("Entrez le chemin du fichier à traiter : ")
     detect_and_process(file_path)

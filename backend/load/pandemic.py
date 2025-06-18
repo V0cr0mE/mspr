@@ -1,6 +1,7 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath("MSPR"))))
+# assure que le dossier backend/ est bien sur sys.path pour importer models
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.config_db import connect_to_db
 
 # Fonction pour établir une connexion à la base de données

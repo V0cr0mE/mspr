@@ -9,7 +9,6 @@ def get_daily_data(id_country, id_pandemic, date=None):
     """
     params = [id_country, id_pandemic]
     
-    # Filtrer par date si elle est fournie
     if date:
         query += " AND \"date\" = %s"
         params.append(date)
@@ -22,7 +21,7 @@ def get_daily_data(id_country, id_pandemic, date=None):
                 "id_country": row[0],
                 "id_pandemic": row[1],
                 "date": row[2].strftime('%Y-%m-%d'),
-                "active_cases":row[3],
+                "active_cases": row[3],
                 "daily_new_deaths": row[4],
                 "daily_new_cases": row[5]
             }
@@ -66,3 +65,32 @@ def delete_daily_data(id_country, id_pandemic, date):
         """, (id_country, id_pandemic, date))
     conn.commit()
     conn.close()
+
+# Récupérer la dernière date disponible pour chaque pays pour une pandémie
+# Renvoie une liste de dicts avec id_country, country name, date, daily_new_cases, daily_new_deaths
+
+def get_latest_data_all_countries(id_pandemic):
+    conn = connect_to_db()
+    query = """
+        SELECT DISTINCT ON (d.id_country) d.id_country, c.country, d.date,
+               d.daily_new_cases, d.daily_new_deaths
+        FROM daily_pandemic_country d
+        JOIN country c ON d.id_country = c.id_country
+        WHERE d.id_pandemic = %s
+        ORDER BY d.id_country, d.date DESC;
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(query, (id_pandemic,))
+        rows = cursor.fetchall()
+        data = [
+            {
+                "id_country": row[0],
+                "country": row[1],
+                "date": row[2].strftime('%Y-%m-%d'),
+                "daily_new_cases": row[3],
+                "daily_new_deaths": row[4]
+            }
+            for row in rows
+        ]
+    conn.close()
+    return data

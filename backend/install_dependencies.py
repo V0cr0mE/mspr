@@ -21,7 +21,12 @@ if __name__ == "__main__":
         "pandas",
         "plotly",
         "flask",
-        "werkzeug"
+        "werkzeug",
+        "CORS",
+        "flask_cors",
+        "flasgger",
+        "psycopg2",
+        "psycopg2-binary"
     ]
     install_packages(dependencies)
     print("Toutes les dépendances sont installées !")
