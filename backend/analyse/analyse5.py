@@ -3,7 +3,7 @@
 import pandas as pd
 
 # Chargement du fichier nettoyé
-file_path = "C:/Users/Anes/MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
+file_path = "../MSPR/donnes_clean/worldometer_coronavirus_daily_data_clean.csv"
 df = pd.read_csv(file_path)
 
 print("\n📊 Vérification du fichier nettoyé :", file_path)

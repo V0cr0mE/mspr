@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-df = pd.read_csv("C:/Users/Anes/MSPR/donnes/worldometer_coronavirus_summary_data.csv")
+df = pd.read_csv("../MSPR/donnes/worldometer_coronavirus_summary_data.csv")
 
 missing_values = df.isnull().sum()
 missing_percentage = (missing_values / len(df)) * 100
