@@ -141,8 +141,10 @@ export default function Dashboard() {
                             <div className="space-y-8">
                                 <PieChart byContinent={byContinent} statType={statType} />
                                 <BarChart byContinent={byContinent} statType={statType} />
-                                <Map pandemicId={selectedPandemic} statType={statType} />
                             </div>
+                        </div>
+                        <div className="w-full mt-8">
+                            <Map pandemicId={selectedPandemic} statType={statType} />
                         </div>
                     </section>
                 </div>
