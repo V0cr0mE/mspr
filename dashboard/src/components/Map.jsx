@@ -24,8 +24,8 @@ export default function Map({ pandemicId, statType }) {
             lons.push(coords[0]);
             lats.push(coords[1]);
             const value = d[statType] || 0;
-            // simple scaling for visibility
-            const size = Math.sqrt(value) * 2;
+            // reduce scaling factor so markers don't obscure the map
+            const size = Math.sqrt(value) * 0.5;
             sizes.push(size);
             texts.push(`${d.country}<br>Cas: ${d.daily_new_cases || 0}<br>Décès: ${d.daily_new_deaths || 0}`);
         }
