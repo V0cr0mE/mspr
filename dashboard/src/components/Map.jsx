@@ -32,7 +32,7 @@ export default function Map({ pandemicId, statType }) {
     });
 
     return (
-        <div className="w-full h-80">
+        <div className="w-full h-64 md:h-80 lg:h-96">
             <h2 className="text-2xl font-bold mb-2">Carte des {statType === 'daily_new_cases' ? 'cas quotidiens' : 'décès quotidiens'}</h2>
             {lons.length === 0 ? (
                 <p>Aucune donnée pour cette carte.</p>
@@ -51,7 +51,12 @@ export default function Map({ pandemicId, statType }) {
                     }]}
                     layout={{
                         geo: {
-                            projection: { type: 'natural earth' }
+                            projection: { type: 'natural earth' },
+                            bgcolor: '#1f2937',
+                            showland: true,
+                            showocean: true,
+                            landcolor: '#2d3748',
+                            oceancolor: '#1e293b'
                         },
                         paper_bgcolor: '#1f2937',
                         plot_bgcolor: '#1f2937',
