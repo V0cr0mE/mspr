@@ -24,7 +24,8 @@ from routes.daily_pandemic_country import bp as daily_pandemic_country_bp
 from routes.prediction import bp as prediction_bp
 
 UPLOAD_FOLDER = 'donnes'
-CLEAN_DATA_FOLDER = '../donnes_clean/'
+# Path to the cleaned data directory inside the backend folder
+CLEAN_DATA_FOLDER = os.path.join(os.path.dirname(__file__), 'donnes_clean')
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf'}
 
 def allowed_file(filename):
