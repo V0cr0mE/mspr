@@ -1,21 +1,25 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
 
-export default function Histogram({ dailyData, statType }) {
+export default function Histogram({ predictionData, statType }) {
     return (
         <div>
             <h2 className="text-2xl font-bold mb-2">
-                Histogramme : {statType === 'daily_new_cases' ? 'Cas quotidiens' : 'Décès quotidiens'}
+                Prédictions 7 jours : {statType === 'daily_new_cases' ? 'Cas quotidiens' : 'Décès quotidiens'}
             </h2>
-            {dailyData.length === 0 ? (
+            {predictionData.length === 0 ? (
                 <p>Aucune donnée pour cet histogramme.</p>
             ) : (
                 <div className="w-full h-64 md:h-80 lg:h-96">
                     <Plot
                         data={[
                             {
-                                x: dailyData.map(d => d.date),
-                                y: dailyData.map(d => d[statType] || 0),
+                                x: predictionData.map(d => d.date),
+                                y: predictionData.map(d =>
+                                    statType === 'daily_new_cases'
+                                        ? d.predicted_cases || 0
+                                        : d.predicted_deaths || 0
+                                ),
                                 type: 'bar',
                                 marker: { color: 'tomato' }
                             }

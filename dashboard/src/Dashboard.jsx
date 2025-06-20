@@ -30,6 +30,7 @@ export default function Dashboard() {
 
     // Données journalières
     const [dailyData, setDailyData] = useState([]);
+    const [predictionData, setPredictionData] = useState([]);
 
     // Agrégation par continent
     const [byContinent, setByContinent] = useState([]);
@@ -91,6 +92,18 @@ export default function Dashboard() {
             .catch(err => console.error("Erreur dailyData:", err));
     }, [selectedCountry, selectedPandemic, startDate, endDate]);
 
+    // Récupérer les prédictions pour le graphique en barre
+    useEffect(() => {
+        if (!selectedCountry || !selectedPandemic) {
+            setPredictionData([]);
+            return;
+        }
+        const type = statType === 'daily_new_cases' ? 'cases' : 'deaths';
+        axios.get(`http://127.0.0.1:5000/predict/${type}/${selectedCountry}/${selectedPandemic}`)
+            .then(res => setPredictionData(res.data))
+            .catch(err => console.error('Erreur predictions:', err));
+    }, [selectedCountry, selectedPandemic, statType]);
+
     // Récupérer l'agrégation par continent
     useEffect(() => {
         axios.get(`http://127.0.0.1:5000/pandemic_country/continent`)
@@ -136,7 +149,7 @@ export default function Dashboard() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div className="space-y-8">
                                 <LineChart dailyData={dailyData} statType={statType} />
-                                <Histogram dailyData={dailyData} statType={statType} />
+                                <Histogram predictionData={predictionData} statType={statType} />
                             </div>
                             <div className="space-y-8">
                                 <PieChart byContinent={byContinent} statType={statType} />
